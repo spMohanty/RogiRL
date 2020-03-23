@@ -702,8 +702,8 @@ while not done:
 	screen.blit(controlsHeadingText, (leftTextPadding, controlsSectionOffsetY + topTextPadding))
 	
 	# Draw bottom key controls text
-	for	curerntControlTextIndex in range (0, len(controlsTexts)):
-		screen.blit(controlsTexts[curerntControlTextIndex], (leftTextPadding, controlsSectionOffsetY + topBarSizeY + topTextPadding + curerntControlTextIndex*smallFontHeight))
+	# for	curerntControlTextIndex in range (0, len(controlsTexts)):
+	# 	screen.blit(controlsTexts[curerntControlTextIndex], (leftTextPadding, controlsSectionOffsetY + topBarSizeY + topTextPadding + curerntControlTextIndex*smallFontHeight))
 	
 	# -------------------- UPDATE SCREEN --------------------
 	
