@@ -23,8 +23,16 @@ class Individual:
         self.x = x
         self.y = y
         self.state = state
+        self.time_since_last_state_change = 0
         self.grid = grid
         self.id = str(uuid.uuid4())
+    
+
+    def __eq__(self, other):
+        """Overrides the default implementation"""
+        if isinstance(other, Individual):
+            return self.id == other.id
+        return NotImplemented
 
     def __str__(self):
         return "Individual( state={} , x={} , y={} , id={} )".format(self.state.name, self.x, self.y, self.id)
