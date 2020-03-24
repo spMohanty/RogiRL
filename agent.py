@@ -42,6 +42,8 @@ class AgentEvent:
             self.update_timestep,
             self.wall_time
         )
+    def __repr__(self):
+        return self.__str__()
 
 class Agent:
     def __init__(
@@ -75,6 +77,13 @@ class Agent:
         - does validations about certain state transitions
         - does internal housekeeping of any other metadata that needs to be captured
         """
+        # TODO : Add validation 
+        event = AgentEvent(
+            previous_state = self.state,
+            new_state = state,
+            update_timestep = self.timestep
+        )
+        self.add_event(event)
         self.state = state
 
     def move_to(self, coord: Coordinate):
@@ -102,6 +111,9 @@ if __name__ == "__main__":
     agent.move_to(coordinate)
 
     print(agent)
-
+    print(agent.event_log)
+    agent.set_state(AgentStates.INFECTIOUS)
+    print(agent)
+    print(agent.event_log)
     
 
