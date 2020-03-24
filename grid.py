@@ -25,7 +25,7 @@ class Grid:
         for _height in range(self.grid_height):
             self.grid.append([False]*self.grid_width)
 
-    def initialize_agents(self, number_of_agents, state=IndividualStates.SUSCEPTIBLE):
+    def initialize_individuals(self, number_of_agents, state=IndividualStates.SUSCEPTIBLE):
         for _ in range(number_of_agents):
             agent_x, agent_y = self.get_random_empty_cell()
             agent_state = state
@@ -84,9 +84,9 @@ class Grid:
     
 if __name__ == "__main__":
     grid = Grid(20, 20, 40)
-    grid.initialize_agents(10, IndividualStates.SUSCEPTIBLE)
-    grid.initialize_agents(10, IndividualStates.EXPOSED)
-    grid.initialize_agents(10, IndividualStates.INFECTIOUS)
-    grid.initialize_agents(10, IndividualStates.RECOVERED)
-    grid.initialize_agents(10, IndividualStates.DEAD)
+    grid.initialize_individuals(10, IndividualStates.SUSCEPTIBLE)
+    grid.initialize_individuals(10, IndividualStates.EXPOSED)
+    grid.initialize_individuals(10, IndividualStates.INFECTIOUS)
+    grid.initialize_individuals(10, IndividualStates.RECOVERED)
+    grid.initialize_individuals(10, IndividualStates.DEAD)
     grid.render_grid()
