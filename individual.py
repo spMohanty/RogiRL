@@ -10,13 +10,16 @@ class IndividualStates(Enum):
     RECOVERED = 4
     DEAD = 5
 
+
 class Individual:
     def __init__(
                 self,
                 x,
                 y,
-                grid
+                state = IndividualStates.SUSCEPTIBLE,
+                grid = False
                 ):
         self.x = x
         self.y = y
+        self.state = state
         self.grid = grid
