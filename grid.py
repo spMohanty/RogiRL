@@ -89,4 +89,10 @@ if __name__ == "__main__":
     grid.initialize_individuals(10, IndividualStates.INFECTIOUS)
     grid.initialize_individuals(10, IndividualStates.RECOVERED)
     grid.initialize_individuals(10, IndividualStates.DEAD)
+
+
+
     grid.render_grid()
+
+    # for _agent in grid.agents:
+    #     print(_agent)
