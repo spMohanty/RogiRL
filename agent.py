@@ -3,47 +3,11 @@
 
 
 import numpy as np
-from enum import Enum
 import uuid
-import time
+from agent_event import AgentEvent
+from agent_state import AgentState
+from coordinate import Coordinate
 
-# Susceptible, Exposed, Infectious, Symptomatic, Recovered/Dead
-class AgentState(Enum):
-    SUSCEPTIBLE = 0
-    EXPOSED = 1
-    INFECTIOUS = 2
-    SYMPTOMATIC = 3
-    RECOVERED = 4
-    DEAD = 5
-
-class Coordinate:
-    def __init__(self, x=False, y=False):
-        self.x = x
-        self.y = y
-
-    def __str__(self):
-        return "Coordinate(x={} , y={})".format(self.x, self.y)
-
-class AgentEvent:
-    def __init__(   self, 
-                    previous_state=AgentState.SUSCEPTIBLE,
-                    new_state=AgentState.SUSCEPTIBLE,
-                    update_timestep=-1
-                ):
-        self.previous_state = previous_state
-        self.new_state = new_state
-        self.update_timestep = update_timestep
-        self.wall_time = time.time()
-
-    def __str__(self):
-        return "AgentEvent({} => {} || t = {} || wall_time = {})".format(
-            self.previous_state.name,
-            self.new_state.name,
-            self.update_timestep,
-            self.wall_time
-        )
-    def __repr__(self):
-        return self.__str__()
 
 class Agent:
     def __init__(
