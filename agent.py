@@ -8,7 +8,7 @@ import uuid
 import time
 
 # Susceptible, Exposed, Infectious, Symptomatic, Recovered/Dead
-class AgentStates(Enum):
+class AgentState(Enum):
     SUSCEPTIBLE = 0
     EXPOSED = 1
     INFECTIOUS = 2
@@ -26,8 +26,8 @@ class Coordinate:
 
 class AgentEvent:
     def __init__(   self, 
-                    previous_state=AgentStates.SUSCEPTIBLE,
-                    new_state=AgentStates.SUSCEPTIBLE,
+                    previous_state=AgentState.SUSCEPTIBLE,
+                    new_state=AgentState.SUSCEPTIBLE,
                     update_timestep=-1
                 ):
         self.previous_state = previous_state
@@ -36,9 +36,9 @@ class AgentEvent:
         self.wall_time = time.time()
 
     def __str__(self):
-        return "AgentEvent({} => {} || t = {} || wall_time = {}".format(
-            self.previous_state,
-            self.new_state,
+        return "AgentEvent({} => {} || t = {} || wall_time = {})".format(
+            self.previous_state.name,
+            self.new_state.name,
             self.update_timestep,
             self.wall_time
         )
@@ -49,7 +49,7 @@ class Agent:
     def __init__(
                 self,
                 coordinate : Coordinate,
-                state:AgentStates = AgentStates.SUSCEPTIBLE,
+                state:AgentState = AgentState.SUSCEPTIBLE,
                 uid=False
                 ):
         self.coordinate = coordinate
@@ -71,7 +71,7 @@ class Agent:
         """
         pass
 
-    def set_state(self, state: AgentStates):
+    def set_state(self, state: AgentState):
         """
         - Sets the current state of the agent
         - does validations about certain state transitions
@@ -104,7 +104,7 @@ if __name__ == "__main__":
     coordinate = Coordinate(0,0)
     print(coordinate)
 
-    agent = Agent(coordinate, AgentStates.SUSCEPTIBLE)
+    agent = Agent(coordinate, AgentState.SUSCEPTIBLE)
     print(agent)
 
     coordinate = Coordinate(100,100)
@@ -112,7 +112,7 @@ if __name__ == "__main__":
 
     print(agent)
     print(agent.event_log)
-    agent.set_state(AgentStates.INFECTIOUS)
+    agent.set_state(AgentState.INFECTIOUS)
     print(agent)
     print(agent.event_log)
     
