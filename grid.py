@@ -118,7 +118,7 @@ class Grid:
                 
                 target_coord = Coordinate(coord.x + _x_diff, coord.y + _y_diff)
                 try:
-                    foo = self.grid[target_coord]
+                    foo = self.get_agent(target_coord)
                     # an agent exists at this location
                 except KeyError:
                     # Empty Cell ! yay !
@@ -134,20 +134,18 @@ class Grid:
         """
         neighbours = []
         for _x_diff in range(-1*radius, radius+1):
-            for _y_diff in range(-1*radius, radius+1):
-                if _x_diff == 0 and _y_diff == 0:
-                    # This is the case of the coord-cell
-                    continue
-                
+            for _y_diff in range(-1*radius, radius+1):                
                 target_coord = Coordinate(coord.x + _x_diff, coord.y + _y_diff)
+                # print("Target Coord : ", target_coord)
+                # print(self.get_agent(target_coord))
                 try:
-                    foo = self.grid[target_coord]
+                    foo = self.get_agent(target_coord)
                     # an agent exists at this location
-                    neighbours.append(self.grid[target_coord])
+                    neighbours.append(self.get_agent(target_coord))
                 except KeyError:
                     # Empty Cell ! Ignore
                     pass
-        
+
         return neighbours
 
     def __str__(self):

@@ -154,9 +154,9 @@ class SimpleSEIRDiseaseScheduler(SEIRDiseaseScheduler):
     This class plans the schedule of different state transitions for a disease
     """
     def __init__(   self,
-                    latent_period = 2 * 4,
-                    incubation_period = 5 * 4,
-                    recovery_period = 14 * 4,
+                    latent_period = 2 * 1,
+                    incubation_period = 5 * 1,
+                    recovery_period = 14 * 1,
                     np_random = False
                 ):
         self.latent_period_mu = latent_period

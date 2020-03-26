@@ -101,7 +101,43 @@ class DiseaseEngine:
         for k in range(number_of_agents_to_infect):
             _agent = susceptible_agents[k]
             self.trigger_infection(_agent, prob_infection=1.0)
-            _agent.process_events()
+            # _agent.process_events()
+
+    def tick(self):
+        ########################################
+        # Spread Infection
+        #
+        # - For all infectious agents, 
+        #   infect the neighbouring cells with relevant prob
+        ########################################
+        ########################################
+        valid_infectious_agents = []
+        valid_infectious_agents += self.get_agents_with_state(AgentState.INFECTIOUS)
+        valid_infectious_agents += self.get_agents_with_state(AgentState.SYMPTOMATIC)
+
+        for _infectious_agent in valid_infectious_agents:
+            target_candidates = self.grid.get_all_neighbours(_infectious_agent.coordinate)
+            # print(target_candidates)
+            for _target_candidate in target_candidates:
+                if _target_candidate.state == AgentState.SUSCEPTIBLE:
+                    #print("Trying to infect : ", _target_candidate)
+                    self.trigger_infection(_target_candidate, prob_infection=self.prob_infection)
+
+        ########################################
+        ########################################
+        # Tick all agents
+        #
+        ########################################
+        ########################################
+        all_agents = []
+        for state_name in AgentState:
+            all_agents += self.agent_registry[state_name].values()
+
+        for _agent in all_agents:
+            _agent.tick()
+            self.update_agent_in_registry(_agent)
+        
+        self.timestep += 1 
 
 if __name__ == "__main__":
 
@@ -110,6 +146,13 @@ if __name__ == "__main__":
                             grid_height=10,
                             n_agents=100,
                             initial_infection_fraction=0.05,
-                            prob_infection=1.0
+                            prob_infection=0.04
                             )
-    print(disease_engine.grid)
+    # print(disease_engine.grid)
+    # print(disease_engine.grid.get_all_neighbours(Coordinate(0,0)))
+    while True:
+        input()
+        print("Timestep : {}".format(disease_engine.timestep))
+        disease_engine.tick()
+        print(disease_engine.grid)
+        # print(disease_engine.agent_registry)

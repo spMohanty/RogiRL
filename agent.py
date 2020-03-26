@@ -50,7 +50,7 @@ class Agent:
         try:
             pending_events = self.event_buffer[self.timestep]
             for _event in pending_events:
-                assert self.state == _event.previous_state, "Mismatch in state during AgentEvent execution"
+                # assert self.state == _event.previous_state, "Mismatch in state during AgentEvent execution"
                 self.set_state(_event.new_state)
                 _event.mark_as_executed()
         except KeyError:
