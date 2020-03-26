@@ -6,6 +6,8 @@ from agent import Agent
 from coordinate import Coordinate
 from grid import Grid
 
+import time
+
 from disease_scheduler import SimpleSEIRDiseaseScheduler
 
 class DiseaseEngine:
@@ -102,6 +104,15 @@ class DiseaseEngine:
             _agent = susceptible_agents[k]
             self.trigger_infection(_agent, prob_infection=1.0)
             # _agent.process_events()
+    def print_stats(self):
+        stats = ""
+        stats += "="*10 + "\n"
+        stats += "="*10 + "\n"
+        for state_name in AgentState:
+            stats += "{}:\t{}\n".format(state_name,len(self.agent_registry[state_name]))
+        stats += "="*10 + "\n"
+        print(stats)
+        
 
     def tick(self):
         ########################################
@@ -119,7 +130,7 @@ class DiseaseEngine:
             target_candidates = self.grid.get_all_neighbours(_infectious_agent.coordinate)
             # print(target_candidates)
             for _target_candidate in target_candidates:
-                if _target_candidate.state == AgentState.SUSCEPTIBLE:
+                if _target_candidate and _target_candidate.state == AgentState.SUSCEPTIBLE:
                     #print("Trying to infect : ", _target_candidate)
                     self.trigger_infection(_target_candidate, prob_infection=self.prob_infection)
 
@@ -142,17 +153,20 @@ class DiseaseEngine:
 if __name__ == "__main__":
 
     disease_engine = DiseaseEngine(
-                            grid_width=10,
-                            grid_height=10,
-                            n_agents=100,
-                            initial_infection_fraction=0.05,
-                            prob_infection=0.04
+                            grid_width=20,
+                            grid_height=20,
+                            n_agents=400,
+                            initial_infection_fraction=0.01,
+                            prob_infection=0.05
                             )
     # print(disease_engine.grid)
     # print(disease_engine.grid.get_all_neighbours(Coordinate(0,0)))
-    while True:
-        input()
+    _time = time.time()
+    for k in range(100):
         print("Timestep : {}".format(disease_engine.timestep))
         disease_engine.tick()
         print(disease_engine.grid)
+        print(time.time() - _time)
+        print(disease_engine.print_stats())
+        _time = time.time()
         # print(disease_engine.agent_registry)
