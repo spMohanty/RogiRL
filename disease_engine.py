@@ -16,6 +16,7 @@ class DiseaseEngine:
                     grid_height=100, 
                     n_agents=10,
                     initial_infection_fraction=0.2,
+                    initial_vaccination_fraction=0.05,
                     prob_infection=0.2,
                     prob_agent_movement=0.1,
                     toric_grid=True,
@@ -26,6 +27,8 @@ class DiseaseEngine:
         self.grid_height = grid_height
         self.n_agents = n_agents
         self.initial_infection_fraction = initial_infection_fraction
+        self.initial_vaccination_fraction = initial_vaccination_fraction
+
         self.prob_infection = prob_infection
         self.prob_agent_movement = prob_agent_movement
         self.toric_grid = toric_grid
@@ -42,6 +45,7 @@ class DiseaseEngine:
         self.initialize_disease_scheduler()
 
         self.initialize_infection()
+        self.initialize_vaccination()
 
     def initialize_grid(self):
         self.grid = Grid(
@@ -64,6 +68,12 @@ class DiseaseEngine:
             _agent = Agent(empty_cells[n])
             self.grid.set_agent(_agent)
             self.update_agent_in_registry(_agent)
+
+    def initialize_vaccination(self):
+        # Vaccinate some individuals
+        for _agent in self.agent_registry[AgentState.SUSCEPTIBLE].values():
+            if self.np_random.rand() < self.initial_vaccination_fraction:
+                self.vaccinate_cell(_agent.coordinate)        
 
     def initialize_agent_registry(self):
         self.agent_registry = {}
@@ -195,16 +205,12 @@ if __name__ == "__main__":
                             grid_height=30,
                             n_agents=200,
                             initial_infection_fraction=0.04,
+                            initial_vaccination_fraction=0.05,
                             prob_infection=0.2,
                             prob_agent_movement=0.5
                             )
     # print(disease_engine.grid)
     # print(disease_engine.grid.get_all_neighbours(Coordinate(0,0)))
-
-    # Vaccinate some individuals
-    for _agent in disease_engine.agent_registry[AgentState.SUSCEPTIBLE].values():
-        if disease_engine.np_random.rand() < 0.1:
-            disease_engine.vaccinate_cell(_agent.coordinate)
 
     print(disease_engine.grid)
     _time = time.time()
