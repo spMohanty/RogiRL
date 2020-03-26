@@ -10,14 +10,29 @@ class AgentEvent:
         self.previous_state = previous_state
         self.new_state = new_state
         self.update_timestep = update_timestep
-        self.wall_time = time.time()
+        self.mark_as_pending()
+        self.created_at = time.time()
+        self.updated_at = time.time()
+    
+    def mark_as_executed(self):
+        """
+        Mark that this event has been executed
+        """
+        self.execution_status = True
+        self.updated_at = time.time()
+
+    def mark_as_pending(self):
+        """
+        Mark that the execution of this event is pending
+        """
+        self.execution_status = False
 
     def __str__(self):
-        return "AgentEvent({} => {} || t = {} || wall_time = {})".format(
+        return "AgentEvent(t = {} || {} => {} || Status : {})".format(
+            self.update_timestep,
             self.previous_state.name,
             self.new_state.name,
-            self.update_timestep,
-            self.wall_time
+            self.execution_status
         )
     def __repr__(self):
         return self.__str__()

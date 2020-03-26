@@ -22,32 +22,51 @@ class Agent:
         if not self.uid:
             self.uid = str(uuid.uuid4())[:5]
         assert type(self.uid) == str
-        self.event_log = []
+        self.event_buffer = {}
         self.timestep = 0
 
-    def add_event(self, event: AgentEvent):
-        self.event_log.append(event)
+    def register_event(self, event: AgentEvent):
+        timestep_of_event = event.update_timestep
+        assert timestep_of_event >= self.timestep, "Event from the past added to event_buffer"
+
+        # Initialize an empty array for the timestep 
+        # if it doesnt exist already
+        try:
+            foo = self.event_buffer[timestep_of_event]
+        except KeyError:
+            self.event_buffer[timestep_of_event] = []
+        
+        # Add the event to the list of events supposed to be 
+        # executed at the said timestep
+        self.event_buffer[timestep_of_event].append(
+            event
+        )
 
     def tick(self):
         """
             - house keeping calls for each time tick
-            - can optionally be passed a function (From the disease engine), which can modify its attributes if necessary 
+
+            - Check if there are any Events that are pending to be executed for this timestep
+            - Increase the timestep count
         """
-        pass
+        try:
+            pending_events = self.event_buffer[self.timestep]
+            for _event in pending_events:
+                assert self.state == _event.previous_state, "Mismatch in state during AgentEvent execution"
+                self.set_state(_event.new_state)
+                _event.mark_as_executed()
+        except KeyError:
+            # There are no events available for this timestep
+            pass
+
+        self.timestep += 1
 
     def set_state(self, state: AgentState):
         """
         - Sets the current state of the agent
         - does validations about certain state transitions
-        - does internal housekeeping of any other metadata that needs to be captured
         """
         # TODO : Add validation 
-        event = AgentEvent(
-            previous_state = self.state,
-            new_state = state,
-            update_timestep = self.timestep
-        )
-        self.add_event(event)
         self.state = state
 
     def move_to(self, coord: Coordinate):
@@ -75,9 +94,12 @@ if __name__ == "__main__":
     agent.move_to(coordinate)
 
     print(agent)
-    print(agent.event_log)
+    print(agent.event_buffer)
     agent.set_state(AgentState.INFECTIOUS)
+    
+    _event = AgentEvent(update_timestep=100)
+    agent.register_event(_event)
     print(agent)
-    print(agent.event_log)
+    print(agent.event_buffer)
     
 
