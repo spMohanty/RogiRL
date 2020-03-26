@@ -17,6 +17,7 @@ class DiseaseEngine:
                     n_agents=10,
                     initial_infection_fraction=0.2,
                     prob_infection=0.2,
+                    prob_agent_movement=0.1,
                     toric_grid=True,
                     seed = False
                 ):
@@ -26,6 +27,7 @@ class DiseaseEngine:
         self.n_agents = n_agents
         self.initial_infection_fraction = initial_infection_fraction
         self.prob_infection = prob_infection
+        self.prob_agent_movement = prob_agent_movement
         self.toric_grid = toric_grid
 
         self.timestep = 0
@@ -112,7 +114,29 @@ class DiseaseEngine:
             stats += "{}:\t{}\n".format(state_name,len(self.agent_registry[state_name]))
         stats += "="*10 + "\n"
         print(stats)
-        
+    
+    def vaccinate_cell(self, coord: Coordinate):
+        """
+        Vaccinates the agent at a cell if applicable
+        """
+        # if cell is empty, return -1
+        # if cell is anything but susceptible, return -1
+        # if cell is susceptible : return 1
+
+        potential_agent = self.grid.get_agent(coord)
+        if not potential_agent:
+            # Empty Cell
+            return False, -10
+        else:
+            # Agent Found
+            if potential_agent.state == AgentState.SUSCEPTIBLE:
+                potential_agent.set_state(AgentState.VACCINATED)
+                self.grid.set_agent(potential_agent)
+                return True, 10
+            else: 
+                # Agent does not need vaccination
+                return False, -5
+
 
     def tick(self):
         ########################################
@@ -147,20 +171,42 @@ class DiseaseEngine:
         for _agent in all_agents:
             _agent.tick()
             self.update_agent_in_registry(_agent)
+
+        ########################################
+        ########################################
+        # Random Walk of all agents 
+        # - if applicable
+        ########################################
+        ########################################
+        for _agent in all_agents:
+            if self.np_random.rand() < self.prob_agent_movement:
+                empty_cell = self.grid.get_random_empty_neighbouring_cell(_agent.coordinate)
+                if empty_cell:
+                    self.grid.clear_cell(_agent.coordinate)
+                    _agent.move_to(empty_cell)
+                    self.grid.set_agent(_agent)
         
         self.timestep += 1 
 
 if __name__ == "__main__":
 
     disease_engine = DiseaseEngine(
-                            grid_width=20,
-                            grid_height=20,
-                            n_agents=400,
-                            initial_infection_fraction=0.01,
-                            prob_infection=0.05
+                            grid_width=30,
+                            grid_height=30,
+                            n_agents=200,
+                            initial_infection_fraction=0.04,
+                            prob_infection=0.2,
+                            prob_agent_movement=0.5
                             )
     # print(disease_engine.grid)
     # print(disease_engine.grid.get_all_neighbours(Coordinate(0,0)))
+
+    # Vaccinate some individuals
+    for _agent in disease_engine.agent_registry[AgentState.SUSCEPTIBLE].values():
+        if disease_engine.np_random.rand() < 0.1:
+            disease_engine.vaccinate_cell(_agent.coordinate)
+
+    print(disease_engine.grid)
     _time = time.time()
     for k in range(100):
         print("Timestep : {}".format(disease_engine.timestep))
@@ -169,4 +215,5 @@ if __name__ == "__main__":
         print(time.time() - _time)
         print(disease_engine.print_stats())
         _time = time.time()
+        time.sleep(0.1)
         # print(disease_engine.agent_registry)

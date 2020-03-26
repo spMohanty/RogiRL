@@ -44,6 +44,12 @@ class Grid:
         except KeyError:
             return False
 
+    def clear_cell(self, coord: Coordinate):
+        try:
+            del self.grid[hash(coord)]
+        except KeyError:
+            pass
+
     def set_agent(self, agent:Agent):
         """
         Sets the location of the agent at a particular coordinate
@@ -117,12 +123,10 @@ class Grid:
                     continue
                 
                 target_coord = Coordinate(coord.x + _x_diff, coord.y + _y_diff)
-                try:
-                    foo = self.get_agent(target_coord)
-                    # an agent exists at this location
-                except KeyError:
-                    # Empty Cell ! yay !
+                agent_at_coord = self.get_agent(target_coord)
+                if not agent_at_coord:
                     empty_cells.append(target_coord)
+
         if len(empty_cells) == 0:
             return False
         else: 
