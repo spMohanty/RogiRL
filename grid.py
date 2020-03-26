@@ -66,28 +66,42 @@ class Grid:
 
         self.grid[hash(agent.coordinate)] = agent
 
-    def get_random_empty_cell(self):
+    def get_random_empty_cells(self, n_cells=1):
         """
         Returns random empty cell in the whole grid 
 
         If no empty cells available, it returns False
         """
-        iteration = 0
-        while True:
-            random_coord = Coordinate(
-                                self.np_random.randint(self.width),
-                                self.np_random.randint(self.height),
-                            )
-            try:
-                foo = self.grid[random_coord]
-            except KeyError:
-                return random_coord
+        # iteration = 0
+        # while True:
+        #     random_coord = Coordinate(
+        #                         self.np_random.randint(self.width),
+        #                         self.np_random.randint(self.height),
+        #                     )
+        #     try:
+        #         foo = self.grid[random_coord]
+        #     except KeyError:
+        #         return random_coord
             
-            iteration += 1
+        #     iteration += 1
 
-            if iteration >= 10:
-                print("[WARNING] Random Empty Cell not found in {} iterations. Giving Up".format(iteration))
-                return False
+        #     if iteration >= 10:
+        #         print("[WARNING] Random Empty Cell not found in {} iterations. Giving Up".format(iteration))
+        #         return False
+        # TODO : Make this more efficient later
+        empty_cells = []
+        for x in range(self.width):
+            for y in range(self.height):
+                _agent = self.get_agent(Coordinate(x,y))
+                if _agent == False:
+                    # Empty cell
+                    empty_cells.append(Coordinate(x,y))
+        
+        if len(empty_cells) == 0:
+            return False
+        else:
+            self.np_random.shuffle(empty_cells)
+            return empty_cells[:n_cells]
 
     def get_random_empty_neighbouring_cell(self, coord: Coordinate, radius=1):
         """
@@ -148,11 +162,11 @@ class Grid:
                 elif type(cell_item) == Agent:
                     # Case of an actual agent in the cell
                     if cell_item.state == AgentState.SUSCEPTIBLE:
-                        render_string += "S "
+                        render_string += "* "
                     elif cell_item.state == AgentState.EXPOSED:
-                        render_string += "E "
+                        render_string += "o "
                     elif cell_item.state == AgentState.INFECTIOUS:
-                        render_string += "I "
+                        render_string += "O "
                     elif cell_item.state == AgentState.RECOVERED:
                         render_string += "R "
                     elif cell_item.state == AgentState.SYMPTOMATIC:
@@ -187,7 +201,7 @@ if __name__ == "__main__":
     ## Initialize random agents
     grid = Grid(width=10, height=10, n_agents=10)
     for i in range(10):
-        empty_cell = grid.get_random_empty_cell()
+        empty_cell = grid.get_random_empty_cells()
         _agent = Agent(empty_cell)
 
         state = np.random.choice(AgentState)

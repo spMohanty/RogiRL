@@ -41,14 +41,12 @@ class Agent:
         self.event_buffer[timestep_of_event].append(
             event
         )
+    
+    def register_events(self, events):
+        for _event in events:
+            self.register_event(_event)
 
-    def tick(self):
-        """
-            - house keeping calls for each time tick
-
-            - Check if there are any Events that are pending to be executed for this timestep
-            - Increase the timestep count
-        """
+    def process_events(self):
         try:
             pending_events = self.event_buffer[self.timestep]
             for _event in pending_events:
@@ -59,6 +57,15 @@ class Agent:
             # There are no events available for this timestep
             pass
 
+
+    def tick(self):
+        """
+            - house keeping calls for each time tick
+
+            - Check if there are any Events that are pending to be executed for this timestep
+            - Increase the timestep count
+        """
+        self.process_events()
         self.timestep += 1
 
     def set_state(self, state: AgentState):
