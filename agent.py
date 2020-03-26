@@ -65,6 +65,7 @@ class Agent:
         """
         - Sets the current state of the agent
         - does validations about certain state transitions
+        - Any other associated housekeeping tasks
         """
         # TODO : Add validation 
         self.state = state

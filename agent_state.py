@@ -7,4 +7,4 @@ class AgentState(Enum):
     INFECTIOUS = 2
     SYMPTOMATIC = 3
     RECOVERED = 4
-    DEAD = 5
+    VACCINATED = 5
