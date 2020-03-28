@@ -5,6 +5,7 @@ class Colors:
 
     Can potentially use : https://github.com/secretBiology/SecretColors/
     """
+    WHITE = (255, 255, 255)
     RED = (229, 57, 53)
     PINK = (216, 27, 96)
     PURPLE = (142, 36, 170)
@@ -23,6 +24,7 @@ class Colors:
     DEEP_ORANGE = (244, 81, 30)
     BROWN = (109, 76, 65)
     GREY = (117, 117, 117)
+    LIGHT_GREY = ( 234, 237, 237 )
     BLUE_GREY = (84, 110, 122)
 
 if __name__ == "__main__":
