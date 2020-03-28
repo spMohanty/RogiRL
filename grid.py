@@ -15,6 +15,8 @@ class Grid:
         # Initialize grid
         self.grid = {}
 
+        self.grid_state = np.zeros((self.width, self.height, len(AgentState)))
+
         # # Intialize grid state
         # number_of_agent_states = len(AgentState)
         # self.grid_state = np.zeros((width, height, number_of_agent_states))
@@ -47,6 +49,7 @@ class Grid:
     def clear_cell(self, coord: Coordinate):
         try:
             del self.grid[hash(coord)]
+            self.grid_state[coord.x,coord.y,:] = 0
         except KeyError:
             pass
 
@@ -71,6 +74,10 @@ class Grid:
             agent.coordinate.y %= self.height
 
         self.grid[hash(agent.coordinate)] = agent
+        self.grid_state[agent.coordinate.x,agent.coordinate.y,int(agent.state.value)] = 1
+
+    def get_observation(self):
+        return self.grid_state
 
     def get_random_empty_cells(self, n_cells=1):
         """

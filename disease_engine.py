@@ -8,17 +8,19 @@ from grid import Grid
 
 import time
 
-from disease_scheduler import SimpleSEIRDiseaseScheduler
+from disease_scheduler import SimpleSEIRDiseaseScheduler, SEIRDiseaseScheduler
 
 class DiseaseEngine:
     def __init__(   self, 
                     grid_width=100, 
                     grid_height=100, 
                     n_agents=10,
+                    n_vaccines=100,
                     initial_infection_fraction=0.2,
                     initial_vaccination_fraction=0.05,
                     prob_infection=0.2,
                     prob_agent_movement=0.1,
+                    disease_scheduler="simple_seir",
                     toric_grid=True,
                     seed = False
                 ):
@@ -26,6 +28,7 @@ class DiseaseEngine:
         self.grid_width = grid_width
         self.grid_height = grid_height
         self.n_agents = n_agents
+        self.n_vaccines = n_vaccines
         self.initial_infection_fraction = initial_infection_fraction
         self.initial_vaccination_fraction = initial_vaccination_fraction
 
@@ -42,7 +45,7 @@ class DiseaseEngine:
         self.initialize_grid()
         self.initialize_agent_registry()
         self.initialize_agents()
-        self.initialize_disease_scheduler()
+        self.initialize_disease_scheduler(disease_scheduler)
 
         self.initialize_infection()
         self.initialize_vaccination()
@@ -80,9 +83,16 @@ class DiseaseEngine:
         for state_name in AgentState:
             self.agent_registry[state_name] = {}
 
-    def initialize_disease_scheduler(self):
-        self.disease_scheduler = \
-            SimpleSEIRDiseaseScheduler(np_random=self.np_random)
+    def initialize_disease_scheduler(self, scheduler_name="simple_seir"):
+        if scheduler_name == "simple_seir":
+            self.disease_scheduler = \
+                SimpleSEIRDiseaseScheduler(np_random=self.np_random)
+        elif scheduler_name == "seir":
+            self.disease_scheduler = \
+                SEIRDiseaseScheduler(np_random=self.np_random)
+        else:
+            raise NotImplementedError()
+
 
     def update_agent_in_registry(self, agent):
         # If there are any previous instances of agents, then delete them
@@ -134,18 +144,22 @@ class DiseaseEngine:
         # if cell is susceptible : return 1
 
         potential_agent = self.grid.get_agent(coord)
-        if not potential_agent:
-            # Empty Cell
-            return False, -10
+        if self.n_vaccines > 0:
+            self.n_vaccines -= 1
+            if not potential_agent:
+                # Empty Cell
+                return False, -10
+            else:
+                # Agent Found
+                if potential_agent.state == AgentState.SUSCEPTIBLE:
+                    potential_agent.set_state(AgentState.VACCINATED)
+                    self.grid.set_agent(potential_agent)
+                    return True, 10
+                else: 
+                    # Agent does not need vaccination
+                    return False, -5
         else:
-            # Agent Found
-            if potential_agent.state == AgentState.SUSCEPTIBLE:
-                potential_agent.set_state(AgentState.VACCINATED)
-                self.grid.set_agent(potential_agent)
-                return True, 10
-            else: 
-                # Agent does not need vaccination
-                return False, -5
+            return False, - 10
 
 
     def tick(self):
@@ -201,13 +215,16 @@ class DiseaseEngine:
 if __name__ == "__main__":
 
     disease_engine = DiseaseEngine(
-                            grid_width=30,
-                            grid_height=30,
-                            n_agents=200,
+                            grid_width=50,
+                            grid_height=50,
+                            n_agents=1500,
+                            n_vaccines=10,
                             initial_infection_fraction=0.04,
-                            initial_vaccination_fraction=0.05,
-                            prob_infection=0.2,
-                            prob_agent_movement=0.5
+                            initial_vaccination_fraction=0.00,
+                            prob_infection=0.1,
+                            prob_agent_movement=0,
+                            disease_scheduler="seir",
+                            seed=1001
                             )
     # print(disease_engine.grid)
     # print(disease_engine.grid.get_all_neighbours(Coordinate(0,0)))
@@ -220,6 +237,10 @@ if __name__ == "__main__":
         print(disease_engine.grid)
         print(time.time() - _time)
         print(disease_engine.print_stats())
+        print("Observation Shape : ", disease_engine.grid.get_observation().shape)
+
+        # disease_engine.vaccinate_cell()
+
         _time = time.time()
-        time.sleep(0.1)
+        # time.sleep(0.1)
         # print(disease_engine.agent_registry)
