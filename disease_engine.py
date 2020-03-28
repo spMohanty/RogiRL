@@ -107,10 +107,10 @@ class DiseaseEngine:
         return list(self.agent_registry[state].values())
 
     def trigger_infection(self, agent, prob_infection):
-        if self.np_random.rand() < prob_infection:
+        if not agent.is_disease_scheduled() and self.np_random.rand() < prob_infection:
             disease_schedule = self.disease_scheduler.get_disease_schedule(
                                     base_timestep=self.timestep)
-            agent.register_events(disease_schedule)
+            agent.register_disease_events(disease_schedule)
             self.update_agent_in_registry(agent)
 
     def initialize_infection(self):
@@ -179,6 +179,8 @@ class DiseaseEngine:
             # print(target_candidates)
             for _target_candidate in target_candidates:
                 if _target_candidate and _target_candidate.state == AgentState.SUSCEPTIBLE:
+                    # Add control for "double infections" : 
+                    # When two individuals infect the same person at the same time
                     #print("Trying to infect : ", _target_candidate)
                     self.trigger_infection(_target_candidate, prob_infection=self.prob_infection)
 

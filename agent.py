@@ -23,9 +23,10 @@ class Agent:
             self.uid = str(uuid.uuid4())[:5]
         assert type(self.uid) == str
         self.event_buffer = {}
+        self._is_disease_scheduled = False
         self.timestep = 0
 
-    def register_event(self, event: AgentEvent):
+    def _register_disease_event(self, event: AgentEvent):
         timestep_of_event = event.update_timestep
         assert timestep_of_event >= self.timestep, "Event from the past added to event_buffer"
 
@@ -42,15 +43,31 @@ class Agent:
             event
         )
     
-    def register_events(self, events):
-        for _event in events:
-            self.register_event(_event)
+    def register_disease_events(self, events):
+        """
+        Disease events can only be scheduled once
+        """
+        if self._is_disease_scheduled:
+            return
+        else:
+            for _event in events:
+                self._register_disease_event(_event)
+            self._is_disease_scheduled = True
+
+    def is_disease_scheduled(self):
+        """
+        Returns the value of a boolean flag
+        which lets us know if a disease has already been scheduled for this agent or not
+
+        In the current model, each person can only get the disease once.
+        """
+        return self._is_disease_scheduled
 
     def process_events(self):
         try:
             pending_events = self.event_buffer[self.timestep]
             for _event in pending_events:
-                # assert self.state == _event.previous_state, "Mismatch in state during AgentEvent execution"
+                assert self.state == _event.previous_state, "Mismatch in state during AgentEvent execution"
                 self.set_state(_event.new_state)
                 _event.mark_as_executed()
         except KeyError:
@@ -106,7 +123,7 @@ if __name__ == "__main__":
     agent.set_state(AgentState.INFECTIOUS)
     
     _event = AgentEvent(update_timestep=100)
-    agent.register_event(_event)
+    agent._register_disease_event(_event)
     print(agent)
     print(agent.event_buffer)
     
