@@ -172,6 +172,16 @@ class Renderer:
                     ACTIONS.append({
                         "type" : "STEP",
                     })
+            elif event.type == pygame.MOUSEBUTTONUP:
+                mouse_cell = self.get_mouse_cell()
+                if mouse_cell: # If the interaction has happened within the grid
+                    mouse_cell_x, mouse_cell_y = mouse_cell
+                    ACTIONS.append({
+                        "type" : "VACCINATE",
+                        "cell_x" : mouse_cell_x,
+                        "cell_y" : mouse_cell_y
+                    })
+
         return ACTIONS
 
     def pre_render(self):

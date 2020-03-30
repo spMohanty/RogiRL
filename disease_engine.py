@@ -133,7 +133,7 @@ class DiseaseEngine:
                     elif _state == AgentState.RECOVERED:
                         color = COLORS.BLUE
                     elif _state == AgentState.VACCINATED:
-                        color = COLORS.DEEP_ORANGE
+                        color = COLORS.YELLOW
                     else:
                         raise NotImplementedError("Unknown AgentState found")
 
@@ -208,11 +208,13 @@ class DiseaseEngine:
                 if potential_agent.state == AgentState.SUSCEPTIBLE:
                     potential_agent.set_state(AgentState.VACCINATED)
                     self.grid.set_agent(potential_agent)
+                    self.update_agent_in_registry(potential_agent)
                     return True, 10
                 else: 
                     # Agent does not need vaccination
                     return False, -5
         else:
+            # No vaccines left
             return False, - 10
 
 
@@ -271,10 +273,10 @@ class DiseaseEngine:
 if __name__ == "__main__":
 
     disease_engine = DiseaseEngine(
-                            grid_width=50,
-                            grid_height=50,
-                            n_agents=1000,
-                            n_vaccines=10,
+                            grid_width=20,
+                            grid_height=20,
+                            n_agents=100,
+                            n_vaccines=50,
                             initial_infection_fraction=0.1,
                             initial_vaccination_fraction=0.00,
                             prob_infection=0.1,
@@ -285,10 +287,11 @@ if __name__ == "__main__":
                             )
     # print(disease_engine.grid)
     # print(disease_engine.grid.get_all_neighbours(Coordinate(0,0)))
-
+    
     while True:
         renderer_actions = disease_engine.update_renderer()
         for _action in renderer_actions:
+            print("ACtion : ", _action)
             if _action["type"] == "STEP":
                 print("Timestep : {}".format(disease_engine.timestep))
                 _time = time.time()
@@ -297,6 +300,10 @@ if __name__ == "__main__":
                 print(time.time() - _time)
                 print(disease_engine.print_stats())
                 print("Observation Shape : ", disease_engine.grid.get_observation().shape)
+            elif _action["type"] == "VACCINATE":
+                mouse_cell_x = _action["cell_x"]
+                mouse_cell_y = _action["cell_y"]
+                disease_engine.vaccinate_cell(Coordinate(mouse_cell_x, mouse_cell_y))
 
         # disease_engine.vaccinate_cell()
         # input()
