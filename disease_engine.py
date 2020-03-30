@@ -6,6 +6,11 @@ from agent import Agent
 from coordinate import Coordinate
 from grid import Grid
 
+from colors import Colors
+COLORS = Colors()
+
+from renderer import Renderer
+
 import time
 
 from disease_scheduler import SimpleSEIRDiseaseScheduler, SEIRDiseaseScheduler
@@ -22,6 +27,7 @@ class DiseaseEngine:
                     prob_agent_movement=0.1,
                     disease_scheduler="simple_seir",
                     toric_grid=True,
+                    use_renderer=False,
                     seed = False
                 ):
 
@@ -35,6 +41,7 @@ class DiseaseEngine:
         self.prob_infection = prob_infection
         self.prob_agent_movement = prob_agent_movement
         self.toric_grid = toric_grid
+        self.use_renderer = use_renderer
 
         self.timestep = 0
 
@@ -43,6 +50,7 @@ class DiseaseEngine:
             self.np_random.seed(seed)
 
         self.initialize_grid()
+        self.initialize_renderer()
         self.initialize_agent_registry()
         self.initialize_agents()
         self.initialize_disease_scheduler(disease_scheduler)
@@ -58,6 +66,14 @@ class DiseaseEngine:
             self.toric_grid,
             self.np_random
         )
+    def initialize_renderer(self):
+        if self.use_renderer:
+            self.renderer = Renderer(
+                    grid_size=(self.grid_width, self.grid_height)
+                )
+            self.renderer.setup()
+        else:
+            self.renderer = False
     
     def initialize_agents(self):
         # Initialize the whole grid with agents
@@ -92,6 +108,42 @@ class DiseaseEngine:
                 SEIRDiseaseScheduler(np_random=self.np_random)
         else:
             raise NotImplementedError()
+
+    def update_renderer(self):
+        """
+        Updates the latest board state on the renderer
+        """
+        if self.use_renderer:
+            self.renderer.pre_render()
+            for _state in self.agent_registry.keys():
+                for _agent_uid in self.agent_registry[_state]:
+                    _agent = self.agent_registry[_state][_agent_uid]
+                    color = False
+                    _state = _agent.state
+
+                    if _state == AgentState.SUSCEPTIBLE:
+                        color = COLORS.GREEN
+                    elif _state == AgentState.EXPOSED:
+                        color = COLORS.PURPLE
+                    elif _state == AgentState.INFECTIOUS:
+                        color = COLORS.PINK
+                    elif _state == AgentState.SYMPTOMATIC:
+                        color = COLORS.RED
+                    elif _state == AgentState.RECOVERED:
+                        color = COLORS.BLUE
+                    elif _state == AgentState.VACCINATED:
+                        color = COLORS.DEEP_ORANGE
+                    else:
+                        raise NotImplementedError("Unknown AgentState found")
+
+                    self.renderer.draw_cell(
+                        _agent.coordinate.x, _agent.coordinate.y,
+                        color
+                    )
+            self.renderer.post_render()
+        else:
+            raise Exception("Attempt to update renderer when its not initialized")
+
 
 
     def update_agent_in_registry(self, agent):
@@ -219,13 +271,14 @@ if __name__ == "__main__":
     disease_engine = DiseaseEngine(
                             grid_width=50,
                             grid_height=50,
-                            n_agents=1500,
+                            n_agents=1000,
                             n_vaccines=10,
-                            initial_infection_fraction=0.04,
+                            initial_infection_fraction=0.1,
                             initial_vaccination_fraction=0.00,
                             prob_infection=0.1,
-                            prob_agent_movement=0,
+                            prob_agent_movement=0.00,
                             disease_scheduler="seir",
+                            use_renderer=True,
                             seed=1001
                             )
     # print(disease_engine.grid)
@@ -233,10 +286,11 @@ if __name__ == "__main__":
 
     print(disease_engine.grid)
     _time = time.time()
-    for k in range(100):
+    for k in range(1000):
         print("Timestep : {}".format(disease_engine.timestep))
         disease_engine.tick()
-        print(disease_engine.grid)
+        # print(disease_engine.grid)
+        disease_engine.update_renderer()
         print(time.time() - _time)
         print(disease_engine.print_stats())
         print("Observation Shape : ", disease_engine.grid.get_observation().shape)
@@ -244,5 +298,5 @@ if __name__ == "__main__":
         # disease_engine.vaccinate_cell()
 
         _time = time.time()
-        # time.sleep(0.1)
+        # input()
         # print(disease_engine.agent_registry)

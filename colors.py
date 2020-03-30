@@ -30,3 +30,5 @@ class Colors:
 if __name__ == "__main__":
     colors = Colors()
     # TODO setup a small pygame setup to display all the colors in the palette
+
+

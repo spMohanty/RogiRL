@@ -101,9 +101,8 @@ class Renderer:
             rect_width, rect_height
         ))
 
-    def draw_mouse_hightlight(self):
+    def get_mouse_cell(self):
         mouse_x, mouse_y = pygame.mouse.get_pos()
-
         if mouse_x > self.GRID_BASE_X and mouse_x <= self.GRID_MAX_X:
             if mouse_y > self.GRID_BASE_Y and mouse_y <= self.GRID_MAX_Y:
                 mouse_x -= self.GRID_BASE_X
@@ -112,33 +111,42 @@ class Renderer:
                 mouse_cell_x = int(mouse_x / self.CELL_WIDTH)
                 mouse_cell_y = int(mouse_y / self.CELL_HEIGHT)
 
-                mouse_cell_base = self.get_cell_base(mouse_cell_x, mouse_cell_y)
+                return (mouse_cell_x, mouse_cell_y)
+        return False
 
-                # Draw left line
-                pygame.draw.rect(self.screen, self.COLORS.YELLOW,
-                    (mouse_cell_base[0], 
-                    mouse_cell_base[1],
-                    self.MOUSE_HIGHLIGHTER_WIDTH, self.CELL_HEIGHT)
-                )
-                # Draw Top line
-                pygame.draw.rect(self.screen, self.COLORS.YELLOW,
-                    (mouse_cell_base[0], 
-                    mouse_cell_base[1],
-                    self.CELL_WIDTH, self.MOUSE_HIGHLIGHTER_WIDTH)
-                )
-                # Draw Right Line
-                pygame.draw.rect(self.screen, self.COLORS.YELLOW,
-                    (mouse_cell_base[0] + self.CELL_WIDTH - self.MOUSE_HIGHLIGHTER_WIDTH, 
-                    mouse_cell_base[1],
-                    self.MOUSE_HIGHLIGHTER_WIDTH, self.CELL_HEIGHT)
-                )
-                # Draw Bottom Line
-                pygame.draw.rect(self.screen, self.COLORS.YELLOW,
-                    (mouse_cell_base[0], 
-                    mouse_cell_base[1] + self.CELL_HEIGHT - self.MOUSE_HIGHLIGHTER_WIDTH,
-                    self.CELL_WIDTH, self.MOUSE_HIGHLIGHTER_WIDTH)
-                )
+    def draw_mouse_hightlight(self):
+        mouse_cell = self.get_mouse_cell()
+        if mouse_cell:
+            mouse_cell_x, mouse_cell_y = mouse_cell
+            mouse_cell_x = int(mouse_x / self.CELL_WIDTH)
+            mouse_cell_y = int(mouse_y / self.CELL_HEIGHT)
 
+            mouse_cell_base = self.get_cell_base(mouse_cell_x, mouse_cell_y)
+
+            # Draw left line
+            pygame.draw.rect(self.screen, self.COLORS.YELLOW,
+                (mouse_cell_base[0], 
+                mouse_cell_base[1],
+                self.MOUSE_HIGHLIGHTER_WIDTH, self.CELL_HEIGHT)
+            )
+            # Draw Top line
+            pygame.draw.rect(self.screen, self.COLORS.YELLOW,
+                (mouse_cell_base[0], 
+                mouse_cell_base[1],
+                self.CELL_WIDTH, self.MOUSE_HIGHLIGHTER_WIDTH)
+            )
+            # Draw Right Line
+            pygame.draw.rect(self.screen, self.COLORS.YELLOW,
+                (mouse_cell_base[0] + self.CELL_WIDTH - self.MOUSE_HIGHLIGHTER_WIDTH, 
+                mouse_cell_base[1],
+                self.MOUSE_HIGHLIGHTER_WIDTH, self.CELL_HEIGHT)
+            )
+            # Draw Bottom Line
+            pygame.draw.rect(self.screen, self.COLORS.YELLOW,
+                (mouse_cell_base[0], 
+                mouse_cell_base[1] + self.CELL_HEIGHT - self.MOUSE_HIGHLIGHTER_WIDTH,
+                self.CELL_WIDTH, self.MOUSE_HIGHLIGHTER_WIDTH)
+            )
 
 
     def quit_handler(self):
