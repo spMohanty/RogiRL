@@ -118,8 +118,6 @@ class Renderer:
         mouse_cell = self.get_mouse_cell()
         if mouse_cell:
             mouse_cell_x, mouse_cell_y = mouse_cell
-            mouse_cell_x = int(mouse_x / self.CELL_WIDTH)
-            mouse_cell_y = int(mouse_y / self.CELL_HEIGHT)
 
             mouse_cell_base = self.get_cell_base(mouse_cell_x, mouse_cell_y)
 
@@ -149,17 +147,39 @@ class Renderer:
             )
 
 
-    def quit_handler(self):
+    def command_handler(self):
+        """
+        Comands Handled : 
+            - QUIT
+            - VACCINATE
+                - Mouse Click
+            - STEP
+                - "Space" button
+        """
+        ACTIONS = []
         for event in pygame.event.get():
             if event.type in [pygame.QUIT]:
+                ACTIONS.append({
+                    "type" : "QUIT"
+                })
                 pygame.quit()
                 quit()
+            elif event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_ESCAPE:
+                    pygame.quit()
+                    quit()
+                elif event.key == pygame.K_SPACE:
+                    ACTIONS.append({
+                        "type" : "STEP",
+                    })
+        return ACTIONS
 
     def pre_render(self):
-        self.quit_handler()
+        _actions = self.command_handler()
         self.screen.fill(self.COLORS.WHITE)
         self.draw_grid()
         self.draw_mouse_hightlight()
+        return _actions
 
     def post_render(self):
         pygame.display.update()

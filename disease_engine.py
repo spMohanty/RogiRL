@@ -113,8 +113,9 @@ class DiseaseEngine:
         """
         Updates the latest board state on the renderer
         """
+        ACTIONS = []
         if self.use_renderer:
-            self.renderer.pre_render()
+            ACTIONS += self.renderer.pre_render()
             for _state in self.agent_registry.keys():
                 for _agent_uid in self.agent_registry[_state]:
                     _agent = self.agent_registry[_state][_agent_uid]
@@ -141,8 +142,9 @@ class DiseaseEngine:
                         color
                     )
             self.renderer.post_render()
-        else:
-            raise Exception("Attempt to update renderer when its not initialized")
+        
+        return ACTIONS
+        
 
 
 
@@ -284,19 +286,18 @@ if __name__ == "__main__":
     # print(disease_engine.grid)
     # print(disease_engine.grid.get_all_neighbours(Coordinate(0,0)))
 
-    print(disease_engine.grid)
-    _time = time.time()
-    for k in range(1000):
-        print("Timestep : {}".format(disease_engine.timestep))
-        disease_engine.tick()
-        # print(disease_engine.grid)
-        disease_engine.update_renderer()
-        print(time.time() - _time)
-        print(disease_engine.print_stats())
-        print("Observation Shape : ", disease_engine.grid.get_observation().shape)
+    while True:
+        renderer_actions = disease_engine.update_renderer()
+        for _action in renderer_actions:
+            if _action["type"] == "STEP":
+                print("Timestep : {}".format(disease_engine.timestep))
+                _time = time.time()
+                disease_engine.tick()
+                # print(disease_engine.grid)
+                print(time.time() - _time)
+                print(disease_engine.print_stats())
+                print("Observation Shape : ", disease_engine.grid.get_observation().shape)
 
         # disease_engine.vaccinate_cell()
-
-        _time = time.time()
         # input()
         # print(disease_engine.agent_registry)
