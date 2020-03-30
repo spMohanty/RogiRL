@@ -273,13 +273,13 @@ class DiseaseEngine:
 if __name__ == "__main__":
 
     disease_engine = DiseaseEngine(
-                            grid_width=20,
-                            grid_height=20,
-                            n_agents=100,
-                            n_vaccines=50,
+                            grid_width=30,
+                            grid_height=30,
+                            n_agents=400,
+                            n_vaccines=90,
                             initial_infection_fraction=0.1,
                             initial_vaccination_fraction=0.00,
-                            prob_infection=0.1,
+                            prob_infection=0.2,
                             prob_agent_movement=0.00,
                             disease_scheduler="seir",
                             use_renderer=True,
