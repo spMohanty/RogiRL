@@ -189,7 +189,15 @@ class DiseaseEngine:
             _agent = susceptible_agents[k]
             self.trigger_infection(_agent, prob_infection=1.0)
             
-
+    def update_stats(self):
+        self._stats = {}
+        for state_name in AgentState:
+            self._stats[state_name] = len(self.agent_registry[state_name])
+        
+    def get_stats(self):
+        self.update_stats()
+        return self._stats
+        
     def print_stats(self):
         stats = ""
         stats += "="*10 + "\n"
@@ -245,6 +253,9 @@ class DiseaseEngine:
         #
         # - For all infectious agents, 
         #   infect the neighbouring cells with relevant prob
+        #
+        # In the first timestep, we avoid infecting agents
+        #
         ########################################
         ########################################
         if self.timestep > 0:
@@ -263,6 +274,16 @@ class DiseaseEngine:
                         self.trigger_infection(_target_candidate, prob_infection=self.prob_infection)
 
         self.tick_agents()
+
+        self.timestep += 1 
+        # Update renderer ticks 
+        if self.use_renderer:
+            self.renderer.update_stats("SIMULATION_TICKS", "{}".format(self.timestep))
+
+        self.env_steps += 1
+        if self.renderer:
+            self.renderer.update_stats("GAME_TICKS","{}".format(self.env_steps))
+
 
     def tick_agents(self):
         ########################################
@@ -292,20 +313,10 @@ class DiseaseEngine:
                     self.grid.clear_cell(_agent.coordinate)
                     _agent.move_to(empty_cell)
                     self.grid.set_agent(_agent)
-        
-        self.timestep += 1 
-        # Update renderer ticks 
-        if self.use_renderer:
-            self.renderer.update_stats("SIMULATION_TICKS", "{}".format(self.timestep))
-
-        self.env_steps += 1
-        if self.renderer:
-            self.renderer.update_stats("GAME_TICKS","{}".format(self.env_steps))
 
 
 
 if __name__ == "__main__":
-
     disease_engine = DiseaseEngine(
                             grid_width=50,
                             grid_height=50,
@@ -315,9 +326,9 @@ if __name__ == "__main__":
                             initial_vaccination_fraction=0.00,
                             prob_infection=0.2,
                             prob_agent_movement=0.00,
-                            disease_scheduler="seir",
+                            disease_scheduler="simple_seir",
                             use_renderer=True,
-                            toric_grid=False,
+                            toric_grid=True,
                             seed=1001
                             )
     # print(disease_engine.grid)
