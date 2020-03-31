@@ -1,3 +1,6 @@
+from agent_state import AgentState
+
+
 class Colors:
     """
     Reference : https://materialuicolors.co/
@@ -26,6 +29,37 @@ class Colors:
     GREY = (117, 117, 117)
     LIGHT_GREY = ( 234, 237, 237 )
     BLUE_GREY = (84, 110, 122)
+
+class ColorMap:
+    def __init__(self):
+        self.COLORS = Colors()
+        self.COLOR_MAP = {}
+
+        # AgentState Colors
+        for _state in AgentState:
+            if _state == AgentState.SUSCEPTIBLE:
+                self.COLOR_MAP[_state] = self.COLORS.GREEN
+            elif _state == AgentState.EXPOSED:
+                self.COLOR_MAP[_state] = self.COLORS.PURPLE
+            elif _state == AgentState.INFECTIOUS:
+                self.COLOR_MAP[_state] = self.COLORS.BROWN
+            elif _state == AgentState.SYMPTOMATIC:
+                self.COLOR_MAP[_state] = self.COLORS.RED
+            elif _state == AgentState.RECOVERED:
+                self.COLOR_MAP[_state] = self.COLORS.BLUE
+            elif _state == AgentState.VACCINATED:
+                self.COLOR_MAP[_state] = self.COLORS.YELLOW
+        
+        self.COLOR_MAP["BACKGROUND_COLOR"] = self.COLORS.WHITE
+        self.COLOR_MAP["AGENT_STATE_TEXT_COLOR"] = self.COLORS.GREY
+
+    def get_color(self, d):
+        try:
+            return self.COLOR_MAP[d]
+        except KeyError:
+                raise NotImplementedError("Unknown key in ColorMap. Was it initialized ?")
+
+
 
 if __name__ == "__main__":
     colors = Colors()

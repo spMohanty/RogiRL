@@ -6,8 +6,8 @@ from agent import Agent
 from coordinate import Coordinate
 from grid import Grid
 
-from colors import Colors
-COLORS = Colors()
+from colors import ColorMap
+COLOR_MAP = ColorMap()
 
 from renderer import Renderer
 
@@ -26,6 +26,7 @@ class DiseaseEngine:
                     prob_infection=0.2,
                     prob_agent_movement=0.1,
                     disease_scheduler="simple_seir",
+                    max_timesteps=200,
                     toric_grid=True,
                     use_renderer=False,
                     seed = False
@@ -43,7 +44,9 @@ class DiseaseEngine:
         self.toric_grid = toric_grid
         self.use_renderer = use_renderer
 
+        self.max_timesteps = max_timesteps
         self.timestep = 0
+        self.env_steps = 0
 
         self.np_random = np.random
         if seed != False:
@@ -52,11 +55,13 @@ class DiseaseEngine:
         self.initialize_grid()
         self.initialize_renderer()
         self.initialize_agent_registry()
-        self.initialize_agents()
         self.initialize_disease_scheduler(disease_scheduler)
+        self.initialize_agents()
 
         self.initialize_infection()
         self.initialize_vaccination()
+
+        self.tick()
 
     def initialize_grid(self):
         self.grid = Grid(
@@ -92,7 +97,12 @@ class DiseaseEngine:
         # Vaccinate some individuals
         for _agent in self.agent_registry[AgentState.SUSCEPTIBLE].values():
             if self.np_random.rand() < self.initial_vaccination_fraction:
-                self.vaccinate_cell(_agent.coordinate)        
+                self.vaccinate_cell(_agent.coordinate)
+
+        # Update no of vaccines on renderer
+        if self.renderer:
+            print("Vaccines Left : ", self.n_vaccines)
+            self.renderer.update_stats("VACCINE_BUDGET","{}".format(self.n_vaccines, 0))
 
     def initialize_agent_registry(self):
         self.agent_registry = {}
@@ -115,28 +125,25 @@ class DiseaseEngine:
         """
         ACTIONS = []
         if self.use_renderer:
+            # Draw Renderer
+            # Update Renderer State 
+            total_cases = sum([len(x) for x in self.agent_registry.values()])
+            for _state in self.agent_registry.keys():
+                self.renderer.update_stats(
+                    _state,
+                    "{} ({:.2f}%)".format(
+                        len(self.agent_registry[_state]),
+                        (len(self.agent_registry[_state]) / total_cases) * 100
+                    )
+                )
+
+            # Update the rest of the renderer
             ACTIONS += self.renderer.pre_render()
             for _state in self.agent_registry.keys():
                 for _agent_uid in self.agent_registry[_state]:
                     _agent = self.agent_registry[_state][_agent_uid]
-                    color = False
                     _state = _agent.state
-
-                    if _state == AgentState.SUSCEPTIBLE:
-                        color = COLORS.GREEN
-                    elif _state == AgentState.EXPOSED:
-                        color = COLORS.PURPLE
-                    elif _state == AgentState.INFECTIOUS:
-                        color = COLORS.PINK
-                    elif _state == AgentState.SYMPTOMATIC:
-                        color = COLORS.RED
-                    elif _state == AgentState.RECOVERED:
-                        color = COLORS.BLUE
-                    elif _state == AgentState.VACCINATED:
-                        color = COLORS.YELLOW
-                    else:
-                        raise NotImplementedError("Unknown AgentState found")
-
+                    color = COLOR_MAP.get_color(_state)
                     self.renderer.draw_cell(
                         _agent.coordinate.x, _agent.coordinate.y,
                         color
@@ -166,6 +173,8 @@ class DiseaseEngine:
                                     base_timestep=self.timestep)
             agent.register_disease_events(disease_schedule)
             self.update_agent_in_registry(agent)
+            # if self.timestep == 0:
+            #     agent.process_events()
 
     def initialize_infection(self):
         """
@@ -179,7 +188,8 @@ class DiseaseEngine:
         for k in range(number_of_agents_to_infect):
             _agent = susceptible_agents[k]
             self.trigger_infection(_agent, prob_infection=1.0)
-            # _agent.process_events()
+            
+
     def print_stats(self):
         stats = ""
         stats += "="*10 + "\n"
@@ -198,8 +208,19 @@ class DiseaseEngine:
         # if cell is susceptible : return 1
 
         potential_agent = self.grid.get_agent(coord)
+
+        self.env_steps += 1
+        if self.renderer:
+            self.renderer.update_stats("GAME_TICKS","{}".format(self.env_steps))
+
+
         if self.n_vaccines > 0:
             self.n_vaccines -= 1
+            # Update no of vaccines on renderer
+            if self.renderer:
+                print("Vaccines Left : ", self.n_vaccines)
+                self.renderer.update_stats("VACCINE_BUDGET","{}".format(self.n_vaccines, 0))
+
             if not potential_agent:
                 # Empty Cell
                 return False, -10
@@ -226,20 +247,24 @@ class DiseaseEngine:
         #   infect the neighbouring cells with relevant prob
         ########################################
         ########################################
-        valid_infectious_agents = []
-        valid_infectious_agents += self.get_agents_with_state(AgentState.INFECTIOUS)
-        valid_infectious_agents += self.get_agents_with_state(AgentState.SYMPTOMATIC)
+        if self.timestep > 0:
+            valid_infectious_agents = []
+            valid_infectious_agents += self.get_agents_with_state(AgentState.INFECTIOUS)
+            valid_infectious_agents += self.get_agents_with_state(AgentState.SYMPTOMATIC)
 
-        for _infectious_agent in valid_infectious_agents:
-            target_candidates = self.grid.get_all_neighbours(_infectious_agent.coordinate)
-            # print(target_candidates)
-            for _target_candidate in target_candidates:
-                if _target_candidate and _target_candidate.state == AgentState.SUSCEPTIBLE:
-                    # Add control for "double infections" : 
-                    # When two individuals infect the same person at the same time
-                    #print("Trying to infect : ", _target_candidate)
-                    self.trigger_infection(_target_candidate, prob_infection=self.prob_infection)
+            for _infectious_agent in valid_infectious_agents:
+                target_candidates = self.grid.get_all_neighbours(_infectious_agent.coordinate)
+                # print(target_candidates)
+                for _target_candidate in target_candidates:
+                    if _target_candidate and _target_candidate.state == AgentState.SUSCEPTIBLE:
+                        # Add control for "double infections" : 
+                        # When two individuals infect the same person at the same time
+                        #print("Trying to infect : ", _target_candidate)
+                        self.trigger_infection(_target_candidate, prob_infection=self.prob_infection)
 
+        self.tick_agents()
+
+    def tick_agents(self):
         ########################################
         ########################################
         # Tick all agents
@@ -269,13 +294,22 @@ class DiseaseEngine:
                     self.grid.set_agent(_agent)
         
         self.timestep += 1 
+        # Update renderer ticks 
+        if self.use_renderer:
+            self.renderer.update_stats("SIMULATION_TICKS", "{}".format(self.timestep))
+
+        self.env_steps += 1
+        if self.renderer:
+            self.renderer.update_stats("GAME_TICKS","{}".format(self.env_steps))
+
+
 
 if __name__ == "__main__":
 
     disease_engine = DiseaseEngine(
-                            grid_width=30,
-                            grid_height=30,
-                            n_agents=400,
+                            grid_width=10,
+                            grid_height=10,
+                            n_agents=70,
                             n_vaccines=90,
                             initial_infection_fraction=0.1,
                             initial_vaccination_fraction=0.00,
@@ -283,6 +317,7 @@ if __name__ == "__main__":
                             prob_agent_movement=0.00,
                             disease_scheduler="seir",
                             use_renderer=True,
+                            toric_grid=False,
                             seed=1001
                             )
     # print(disease_engine.grid)
@@ -304,7 +339,15 @@ if __name__ == "__main__":
                 mouse_cell_x = _action["cell_x"]
                 mouse_cell_y = _action["cell_y"]
                 disease_engine.vaccinate_cell(Coordinate(mouse_cell_x, mouse_cell_y))
+            elif _action["type"] == "RUN_TO_COMPLETION":
+                while disease_engine.timestep < disease_engine.max_timesteps:
+                    disease_engine.tick()
+                    renderer_actions = disease_engine.update_renderer()
+                print("Final Results : ")
+                print(disease_engine.print_stats())
 
+        # if disease_engine.timestep >= disease_engine.max_timesteps:
+        #     break
         # disease_engine.vaccinate_cell()
         # input()
         # print(disease_engine.agent_registry)

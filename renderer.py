@@ -4,17 +4,25 @@ import pygame
 import numpy as np
 import time
 
-from colors import Colors
+from colors import Colors, ColorMap
+from agent_state import AgentState
 
 class Renderer:
     def __init__(self, grid_size=(30,30)):
         self.grid_size = grid_size
 
         self.COLORS = Colors()
+        self.COLOR_MAP = ColorMap()
         self.setup_constants()
+        self.setup_stats()
 
     def setup_constants(self):
-        self.CONTROL_PANEL_WIDTH = 100
+
+        self.AGENT_STATUS_FONT_SIZE = 18
+        self.AGENT_STATUS_LINE_SPACE = 5
+
+        self.CONTROL_PANEL_WIDTH = 200
+        self.TOP_PANEL_HEIGHT = 20
         self.MARGIN = 5
         
         # CELL_PROPERTIES
@@ -28,7 +36,7 @@ class Renderer:
         self.GRID_BASE_X = self.MARGIN \
             + self.CONTROL_PANEL_WIDTH \
             + 2 * self.MARGIN
-        self.GRID_BASE_Y = self.MARGIN
+        self.GRID_BASE_Y = self.MARGIN + self.TOP_PANEL_HEIGHT
 
         self.GRID_MAX_X = self.GRID_BASE_X + \
             (self.CELL_WIDTH) * self.get_grid_width()
@@ -37,6 +45,25 @@ class Renderer:
 
         self.WIDTH = self.GRID_MAX_X + self.MARGIN
         self.HEIGHT = self.GRID_MAX_Y + self.MARGIN
+    
+    def setup_stats(self):
+        self.stats = {}
+
+        # AgentState Values
+        for _state in AgentState:
+            self.stats[_state] = 0
+
+        # Simulation Progress 
+        self.stats["SIMULATION_TICKS"] = 0
+        # Game Progress 
+        self.stats["GAME_TICKS"] = 0
+        self.stats["VACCINE_BUDGET"] = 0
+
+
+        self.WIDTH = self.GRID_MAX_X + self.MARGIN 
+        self.HEIGHT = self.GRID_MAX_Y + self.MARGIN + (len(self.stats.keys()) * (self.AGENT_STATUS_LINE_SPACE + self.AGENT_STATUS_FONT_SIZE ))
+
+
 
     def get_cell_base(self, cell_x, cell_y):
         return (
@@ -50,6 +77,112 @@ class Renderer:
     def setup(self):
         pygame.init()
         self.screen = pygame.display.set_mode((self.WIDTH, self.HEIGHT))
+
+    def draw_stats(self):
+        font = pygame.font.SysFont("consolas", self.AGENT_STATUS_FONT_SIZE)
+        top_x = self.MARGIN
+        top_y = self.GRID_BASE_Y + self.MARGIN
+
+        ################################################################
+        ################################################################
+        # Simulation Statistics Header
+        _text_string = "Simulation Statistics"
+        heading_font = pygame.font.SysFont("consolas", int(self.AGENT_STATUS_FONT_SIZE + 2))
+        _text = heading_font.render(_text_string, True, 
+                    self.COLOR_MAP.get_color("AGENT_STATE_TEXT_COLOR"),
+                    self.COLOR_MAP.get_color("BACKGROUND_COLOR"))
+        self.screen.blit(_text, (top_x, top_y))
+        top_y += self.AGENT_STATUS_LINE_SPACE + self.AGENT_STATUS_FONT_SIZE
+        ################################################################
+        ################################################################
+        # Line
+        ################################################################
+        rect_base_x = top_x
+        rect_base_y = top_y
+
+        rect_width = self.CONTROL_PANEL_WIDTH
+        rect_height = 2
+
+        pygame.draw.rect(self.screen, self.COLOR_MAP.get_color("AGENT_STATE_TEXT_COLOR"), (
+            rect_base_x, rect_base_y,
+            rect_width, rect_height
+        ))
+
+        top_y +=  2 * rect_height + self.AGENT_STATUS_LINE_SPACE
+        ################################################################
+        ################################################################
+        # Render AgentState Values
+        ################################################################
+        for _state in AgentState:
+            _text_string = str(self.stats[_state])
+            _text_string += " "
+            _text_string += _state.name
+            _text = font.render(_text_string, True, 
+                        self.COLOR_MAP.get_color(_state),
+                        self.COLOR_MAP.get_color("BACKGROUND_COLOR"))
+            self.screen.blit(_text, (top_x, top_y))
+
+            top_y += self.AGENT_STATUS_LINE_SPACE + self.AGENT_STATUS_FONT_SIZE
+        ################################################################
+        ################################################################
+        # Line
+        ################################################################
+        rect_base_x = top_x
+        rect_base_y = top_y
+
+        rect_width = self.CONTROL_PANEL_WIDTH
+        rect_height = 2
+
+        pygame.draw.rect(self.screen, self.COLOR_MAP.get_color("AGENT_STATE_TEXT_COLOR"), (
+            rect_base_x, rect_base_y,
+            rect_width, rect_height
+        ))
+
+        top_y +=  2 * rect_height + self.AGENT_STATUS_LINE_SPACE
+        ################################################################
+        ################################################################
+        # Simulation Progress Header
+        _text_string = "Progress"
+        heading_font = pygame.font.SysFont("consolas", int(self.AGENT_STATUS_FONT_SIZE + 2))
+        _text = heading_font.render(_text_string, True, 
+                    self.COLOR_MAP.get_color("AGENT_STATE_TEXT_COLOR"),
+                    self.COLOR_MAP.get_color("BACKGROUND_COLOR"))
+        self.screen.blit(_text, (top_x, top_y))
+        top_y += self.AGENT_STATUS_LINE_SPACE + self.AGENT_STATUS_FONT_SIZE
+        ################################################################
+        ################################################################
+        # Line
+        ################################################################
+        rect_base_x = top_x
+        rect_base_y = top_y
+
+        rect_width = self.CONTROL_PANEL_WIDTH
+        rect_height = 2
+
+        pygame.draw.rect(self.screen, self.COLOR_MAP.get_color("AGENT_STATE_TEXT_COLOR"), (
+            rect_base_x, rect_base_y,
+            rect_width, rect_height
+        ))
+
+        top_y +=  2 * rect_height + self.AGENT_STATUS_LINE_SPACE
+        for _state in ["SIMULATION_TICKS", "GAME_TICKS", "VACCINE_BUDGET"]:
+            _text_string = str(self.stats[_state])
+            _text_string += " "
+            _text_string += _state
+            _text = font.render(_text_string, True, 
+                        self.COLOR_MAP.get_color("AGENT_STATE_TEXT_COLOR"),
+                        self.COLOR_MAP.get_color("BACKGROUND_COLOR"))
+            self.screen.blit(_text, (top_x, top_y))
+
+            top_y += self.AGENT_STATUS_LINE_SPACE + self.AGENT_STATUS_FONT_SIZE
+        
+
+    def update_stats(self, key, value):
+        if type(value) != str:
+            raise Exception("rendere.stats value is not String")
+        self.stats[key] = value
+        #print(self.stats)
+            
 
     def draw_grid(self):
         # Draw Vertical Ticks
@@ -172,6 +305,10 @@ class Renderer:
                     ACTIONS.append({
                         "type" : "STEP",
                     })
+                elif event.key == pygame.K_r:
+                    ACTIONS.append({
+                        "type" : "RUN_TO_COMPLETION"
+                    })
             elif event.type == pygame.MOUSEBUTTONUP:
                 mouse_cell = self.get_mouse_cell()
                 if mouse_cell: # If the interaction has happened within the grid
@@ -188,6 +325,7 @@ class Renderer:
         _actions = self.command_handler()
         self.screen.fill(self.COLORS.WHITE)
         self.draw_grid()
+        self.draw_stats()
         self.draw_mouse_hightlight()
         return _actions
 
