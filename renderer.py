@@ -309,6 +309,11 @@ class Renderer:
                     ACTIONS.append({
                         "type" : "RUN_TO_COMPLETION"
                     })
+                elif event.key == pygame.K_v:
+                    ACTIONS.append({
+                        "type" : "RING_VACCINATION"
+                    })
+
             elif event.type == pygame.MOUSEBUTTONUP:
                 mouse_cell = self.get_mouse_cell()
                 if mouse_cell: # If the interaction has happened within the grid

@@ -307,10 +307,10 @@ class DiseaseEngine:
 if __name__ == "__main__":
 
     disease_engine = DiseaseEngine(
-                            grid_width=10,
-                            grid_height=10,
-                            n_agents=70,
-                            n_vaccines=90,
+                            grid_width=50,
+                            grid_height=50,
+                            n_agents=500,
+                            n_vaccines=160,
                             initial_infection_fraction=0.1,
                             initial_vaccination_fraction=0.00,
                             prob_infection=0.2,
@@ -345,6 +345,20 @@ if __name__ == "__main__":
                     renderer_actions = disease_engine.update_renderer()
                 print("Final Results : ")
                 print(disease_engine.print_stats())
+            elif _action["type"] == "RING_VACCINATION":
+                _agent_cache = {}
+                for _agent_state in disease_engine.agent_registry.keys():
+                    if _agent_state in [AgentState.EXPOSED, AgentState.INFECTIOUS, AgentState.SYMPTOMATIC]:
+                        for _agent in disease_engine.agent_registry[_agent_state].values():
+                            neighbours = disease_engine.grid.get_all_neighbours(_agent.coordinate)
+                            for _neighbour in neighbours:
+                                """
+                                TODO: _neighbour is False in some cases. To be investigated.
+                                """
+                                if _neighbour and _neighbour.state == AgentState.SUSCEPTIBLE:
+                                    disease_engine.vaccinate_cell(Coordinate(_neighbour.coordinate.x, _neighbour.coordinate.y))
+                print(disease_engine.print_stats())
+
 
         # if disease_engine.timestep >= disease_engine.max_timesteps:
         #     break
