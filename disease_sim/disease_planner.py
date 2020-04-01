@@ -1,5 +1,3 @@
-import numpy as np
-
 try:
     from .agent_event import AgentEvent
     from .agent_state import AgentState
@@ -13,7 +11,7 @@ class DiseasePlannerBase:
     """
     This class plans the schedule of different state transitions for a disease
     """
-    def __init__(self, np_random=False):
+    def __init__(self, random=False):
         pass
 
     def get_disease_plan(self, base_timestep=0):
@@ -37,7 +35,7 @@ class SEIRDiseasePlanner(DiseasePlannerBase):
                     incubation_period_sigma = 3 * 4,
                     recovery_period_mu = 14 * 4,
                     recovery_period_sigma = 1 * 4,
-                    np_random = False
+                    random = False
                 ):
 
         self.latent_period_mu = latent_period_mu
@@ -47,9 +45,10 @@ class SEIRDiseasePlanner(DiseasePlannerBase):
         self.recovery_period_mu = recovery_period_mu
         self.recovery_period_sigma = recovery_period_sigma
 
-        self.np_random = np_random
-        if not self.np_random:
-            self.np_random = np.random
+        self.random = random
+        if not self.random:
+            import random
+            self.random = random
 
     def get_disease_plan(self, base_timestep=0):
         """
@@ -71,7 +70,7 @@ class SEIRDiseasePlanner(DiseasePlannerBase):
         #############################################
         latent_period = -1
         while True:
-            latent_period = np.around(self.np_random.normal(self.latent_period_mu, self.latent_period_sigma))
+            latent_period = round(self.random.normalvariate(self.latent_period_mu, self.latent_period_sigma))
             if latent_period >= 0 :
                 break
             print(latent_period)
@@ -87,7 +86,7 @@ class SEIRDiseasePlanner(DiseasePlannerBase):
         #############################################
         incubation_period = -1
         while True:
-            incubation_period = np.around(self.np_random.normal(self.incubation_period_mu, self.incubation_period_sigma))
+            incubation_period = round(self.random.normalvariate(self.incubation_period_mu, self.incubation_period_sigma))
             if incubation_period > latent_period:
                 break
         
@@ -102,7 +101,7 @@ class SEIRDiseasePlanner(DiseasePlannerBase):
         #############################################
         recovery_period = -1
         while True:
-            recovery_period = np.around(self.np_random.normal(self.recovery_period_mu, self.recovery_period_sigma))
+            recovery_period = round(self.random.normalvariate(self.recovery_period_mu, self.recovery_period_sigma))
             if recovery_period > incubation_period:
                 break
 
@@ -162,7 +161,7 @@ class SimpleSEIRDiseasePlanner(SEIRDiseasePlanner):
                     latent_period = 2 * 1,
                     incubation_period = 5 * 1,
                     recovery_period = 14 * 1,
-                    np_random = False
+                    random = False
                 ):
         self.latent_period_mu = latent_period
         self.latent_period_sigma = 0
@@ -173,9 +172,10 @@ class SimpleSEIRDiseasePlanner(SEIRDiseasePlanner):
         self.recovery_period_mu = recovery_period
         self.recovery_period_sigma = 0
 
-        self.np_random = np_random
-        if not self.np_random:
-            self.np_random = np.random
+        self.random = random
+        if not self.random:
+            import random
+            self.random = random
 
 
 if __name__ == "__main__":

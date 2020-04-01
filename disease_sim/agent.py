@@ -23,11 +23,47 @@ class DiseaseSimAgent(Agent):  # noqa
         self.prob_agent_movement = prob_agent_movement
         self.moore = moore
 
-        self.state = self.random.choice([x for x in AgentState])
+        # self.state = self.random.choice([x for x in AgentState])
+        self.state = AgentState.SUSCEPTIBLE
+        self.state_transition_plan = {} # Holds the state transition plan, with timestep as the key
 
     def step(self):
         self.random_move()
+        self.process_state_transitions()
+    
+    def process_state_transitions(self):
+        try:
+            _event = self.state_transition_plan[self.model.schedule.steps]
+            assert self.state == _event.previous_state, "Mismatch in state during state_transition"
+            self.state = _event.new_state
+            _event.mark_as_executed()
+        except KeyError:
+            """
+            If not state transition plan exists for the said timestep
+            then ignore
+            """
+            pass
 
+    def trigger_infection(self, prob_infection=1.0):
+        if self._is_infection_scheduled:
+            return
+        else:
+            if self.random.random() < prob_infection:
+                # Prepare a disease plan
+                disease_plan = \
+                    self.model.disease_planner.get_disease_plan(base_timestep=self.model.schedule.steps)
+                for _agent_event in disease_plan:
+                    # Check if a state transition plan is already present for the said timestep
+                    try:
+                        foo = self.state_transition_plan[_agent_event.update_timestep]
+                        raise Exception("Attempt to assign multiple state transition plans for the same timestep")
+                    except KeyError:
+                        pass
+                    # Mark the state transition plan for the said timestep
+                    self.state_transition_plan[_agent_event.update_timestep] = _agent_event
+                
+                
+        
         
     def random_move(self):        
         if self.random.random() < self.prob_agent_movement:

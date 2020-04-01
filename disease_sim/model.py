@@ -6,9 +6,11 @@ from mesa.datacollection import DataCollector
 try:
     from .agent import DiseaseSimAgent
     from .visualization import CustomTextGrid
+    from .disease_planner import SimpleSEIRDiseasePlanner, SEIRDiseasePlanner
 except ImportError:
     from agent import DiseaseSimAgent
     from visualization import CustomTextGrid
+    from disease_planner import SimpleSEIRDiseasePlanner, SEIRDiseasePlanner
 
 class DiseaseSimModel(Model):
     """
@@ -30,7 +32,7 @@ class DiseaseSimModel(Model):
                     initial_vaccination_fraction=0.05,
                     prob_infection=0.2,
                     prob_agent_movement=0.1,
-                    disease_scheduler="simple_seir",
+                    disease_planner="simple_seir",
                     max_timesteps=200,
                     toric=True,
                     seed = None
@@ -48,12 +50,12 @@ class DiseaseSimModel(Model):
         self.prob_infection = prob_infection
         self.prob_agent_movement = prob_agent_movement
 
-        self.disease_scheduler = disease_scheduler
         self.max_timesteps = max_timesteps
         self.toric = toric
         self.seed  = seed 
         
         self.schedule = RandomActivation(self)
+        self.initialize_disease_planner(disease_planner=disease_planner)
 
         self.grid = SingleGrid(width=width, height=height, torus=self.toric)
 
@@ -69,6 +71,10 @@ class DiseaseSimModel(Model):
             self.schedule.add(agent)
             self.grid.position_agent(agent, x="random", y="random")
 
+            # Seed the infection in a fraction of the agents
+            if self.random.random() < self.initial_infection_fraction:
+                agent.trigger_infection(prob_infection=1.0)
+
         # example data collector
         self.datacollector = DataCollector(
             # model_reporters = {"rand" : lambda x : self.random.random()}
@@ -76,6 +82,17 @@ class DiseaseSimModel(Model):
 
         self.running = True
         self.datacollector.collect(self)
+
+    def initialize_disease_planner(self, disease_planner="simple_seir"):
+        if disease_planner == "simple_seir":
+            self.disease_planner = \
+                SimpleSEIRDiseasePlanner(random=self.random)
+        elif disease_planner == "seir":
+            self.disease_planner = \
+                SEIRDiseasePlanner(random=self.random)
+        else:
+            raise NotImplementedError()
+
 
     def step(self):
         """
@@ -86,7 +103,7 @@ class DiseaseSimModel(Model):
 
 if __name__ == "__main__":
     model = DiseaseSimModel(
-                    width=50, 
+                    width=50,
                     height=50,
                     n_agents=1000,
                     n_vaccines=100,
