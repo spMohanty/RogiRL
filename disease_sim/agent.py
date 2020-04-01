@@ -1,4 +1,8 @@
 from mesa import Agent
+try:
+    from .agent_state import AgentState
+except ImportError:
+    from agent_state import AgentState
 
 class DiseaseSimAgent(Agent):  # noqa
     """
@@ -18,6 +22,8 @@ class DiseaseSimAgent(Agent):  # noqa
         self._is_infection_scheduled = False
         self.prob_agent_movement = prob_agent_movement
         self.moore = moore
+
+        self.state = self.random.choice([x for x in AgentState])
 
     def step(self):
         self.random_move()

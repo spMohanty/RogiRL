@@ -93,7 +93,7 @@ if __name__ == "__main__":
                     initial_infection_fraction=0.2,
                     initial_vaccination_fraction=0.05,
                     prob_infection=0.2,
-                    prob_agent_movement=1.0,
+                    prob_agent_movement=0.0,
                     disease_scheduler="simple_seir",
                     max_timesteps=200,
                     toric=True)
@@ -103,11 +103,11 @@ if __name__ == "__main__":
     # print(viz.render())
 
     import time
-    for k in range(100):
+    for k in range(10):
         _time = time.time()
         model.step()
         print(time.time() - _time)
-        print(model.datacollector.get_model_vars_dataframe())
+        # print(model.datacollector.get_model_vars_dataframe())
         # print(viz.render())
 
 
