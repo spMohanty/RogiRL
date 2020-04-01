@@ -30,6 +30,10 @@ class CustomScheduler(RandomActivation):
             except KeyError:
                 pass
     
+    def update_agent_state_in_registry(self, agent: Agent, previous_state: AgentState) -> None:
+        del self._agent_state_index[previous_state][agent.unique_id]
+        self._agent_state_index[agent.state][agent.unique_id] = agent
+
     def get_agents_by_state(self, state: AgentState):
         return list(self._agent_state_index[state].values())
 

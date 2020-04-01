@@ -36,6 +36,8 @@ class DiseaseSimAgent(Agent):  # noqa
             _event = self.state_transition_plan[self.model.schedule.steps]
             assert self.state == _event.previous_state, "Mismatch in state during state_transition"
             self.state = _event.new_state
+
+            self.model.schedule.update_agent_state_in_registry(self, _event.previous_state)
             _event.mark_as_executed()
         except KeyError:
             """
@@ -61,6 +63,7 @@ class DiseaseSimAgent(Agent):  # noqa
                         pass
                     # Mark the state transition plan for the said timestep
                     self.state_transition_plan[_agent_event.update_timestep] = _agent_event
+                self._is_infection_scheduled = True
 
     def random_move(self):        
         if self.random.random() < self.prob_agent_movement:

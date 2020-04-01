@@ -68,6 +68,8 @@ class DiseaseSimModel(Model):
         assert self.n_agents <= self.width * self.height, \
             "More number of agents requested than the actual space available"
 
+
+        number_of_agents_to_infect = int(self.initial_infection_fraction * self.n_agents)
         for i in range(self.n_agents):
             agent = DiseaseSimAgent(
                             unique_id = i, 
@@ -78,13 +80,17 @@ class DiseaseSimModel(Model):
             self.grid.position_agent(agent, x="random", y="random")
 
             # Seed the infection in a fraction of the agents
-            if self.random.random() < self.initial_infection_fraction:
+            if i < number_of_agents_to_infect:
                 agent.trigger_infection(prob_infection=1.0)
-                print("Triggering infection in agent : ", agent.unique_id)
 
         # example data collector
         self.datacollector = DataCollector(
-            model_reporters = {"susceptible_frac" : lambda m: m.schedule.get_agent_fraction_by_state(AgentState.SUSCEPTIBLE)}
+            model_reporters = {
+                    "susceptible_frac" : lambda m: m.schedule.get_agent_fraction_by_state(AgentState.SUSCEPTIBLE),
+                    "exposed_frac" : lambda m: m.schedule.get_agent_fraction_by_state(AgentState.EXPOSED),
+                    "infectious_frac" : lambda m: m.schedule.get_agent_fraction_by_state(AgentState.INFECTIOUS),
+                    "recovered_frac" : lambda m: m.schedule.get_agent_fraction_by_state(AgentState.RECOVERED),
+                }
         )
 
         self.running = True
@@ -109,18 +115,13 @@ class DiseaseSimModel(Model):
         for _infectious_agent in valid_infectious_agents:
             target_candidates = self.grid.get_neighbors(
                 pos = _infectious_agent.pos,
-                moore = self.moore, 
+                moore = True, 
                 include_center = False,
                 radius = 1
             )
             for _target_candidate in target_candidates:
                 if _target_candidate.state == AgentState.SUSCEPTIBLE:
-                    print("Trying to infect : ", _target_candidate)
-                    self.trigger_infection(_target_candidate, prob_infection=self.prob_infection)
                     _target_candidate.trigger_infection(prob_infection=self.prob_infection)
-
-
-            
 
 
     def step(self):
@@ -133,9 +134,9 @@ class DiseaseSimModel(Model):
 
 if __name__ == "__main__":
     model = DiseaseSimModel(
-                    width=4,
-                    height=4,
-                    n_agents=5,
+                    width=50,
+                    height=50,
+                    n_agents=1000,
                     n_vaccines=100,
                     initial_infection_fraction=0.2,
                     initial_vaccination_fraction=0.05,
@@ -149,14 +150,16 @@ if __name__ == "__main__":
     viz = CustomTextGrid(model.grid)
     # print(viz.render())
     
-    print(model.schedule._agent_state_index)
     import time
-    for k in range(10):
+    for k in range(100):
         _time = time.time()
         model.step()
         print(time.time() - _time)
-        print(model.schedule._agent_state_index)
         # print(model.datacollector.get_model_vars_dataframe())
+        # print("S", model.schedule.get_agent_count_by_state(AgentState.SUSCEPTIBLE))
+        # print("E", model.schedule.get_agent_count_by_state(AgentState.EXPOSED))
+        # print("I", model.schedule.get_agent_count_by_state(AgentState.INFECTIOUS))
+        # print("R", model.schedule.get_agent_count_by_state(AgentState.RECOVERED))
         # print(viz.render())
 
 
