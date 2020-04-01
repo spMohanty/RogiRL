@@ -63,17 +63,60 @@ class DiseaseSimModel(Model):
         self.seed  = seed 
 
         self.initialize_observation()
-
-        self.schedule = CustomScheduler(self)
         self.initialize_disease_planner(disease_planner=disease_planner)
+        self.initialize_scheduler()
+        self.initialize_grid()
+        self.initialize_agents(infection_fraction=self.initial_infection_fraction)
+        self.initialize_datacollector()
+        self.running = True
+        self.datacollector.collect(self)
 
-        self.grid = SingleGrid(width=width, height=height, torus=self.toric)
+    ##########################################################################################
+    ##########################################################################################
+    # Setup Initialization Helper Functions
+    ##########################################################################################
+    def initialize_observation(self):
+        """
+        Observation is a nd-array of shape (width, height, num_states)
+        where each AgentState will be marked in a separate challenge for each of the cells
+        """
+        self.observation = np.zeros((self.width, self.height, len(AgentState)))
 
+    def initialize_disease_planner(self, disease_planner="simple_seir"):
+        """
+        Initializes a disease planner that the Agents can use to "schedule" infection progressions
+        """
+        if disease_planner == "simple_seir":
+            self.disease_planner = \
+                SimpleSEIRDiseasePlanner(random=self.random)
+        elif disease_planner == "seir":
+            self.disease_planner = \
+                SEIRDiseasePlanner(random=self.random)
+        else:
+            raise NotImplementedError()
+
+    def initialize_scheduler(self):
+        """
+        Initializes the scheduler
+        """
+        self.schedule = CustomScheduler(self)
+
+    def initialize_grid(self):
+        """
+        Initializes the initial Grid
+        """
+        self.grid = SingleGrid(width=self.width, height=self.height, torus=self.toric)
+
+    def initialize_agents(self, infection_fraction):
+        """
+        Intializes the intial agents on the grid
+        """
         assert self.n_agents <= self.width * self.height, \
             "More number of agents requested than the actual space available"
+        
+        # Assess the number of agents that have to be infected (the seed infection)
+        number_of_agents_to_infect = int(infection_fraction * self.n_agents)
 
-
-        number_of_agents_to_infect = int(self.initial_infection_fraction * self.n_agents)
         for i in range(self.n_agents):
             agent = DiseaseSimAgent(
                             unique_id = i, 
@@ -92,7 +135,10 @@ class DiseaseSimModel(Model):
             if i < number_of_agents_to_infect:
                 agent.trigger_infection(prob_infection=1.0)
 
-        # example data collector
+    def initialize_datacollector(self):
+        """
+        Setup the initial datacollector
+        """
         self.datacollector = DataCollector(
             model_reporters = {
                     "susceptible_frac" : lambda m: m.schedule.get_agent_fraction_by_state(AgentState.SUSCEPTIBLE),
@@ -102,30 +148,10 @@ class DiseaseSimModel(Model):
                 }
         )
 
-        self.running = True
-        self.datacollector.collect(self)
-
     def get_observation(self):
         # assert self.observation.sum(axis=-1).max() <= 1.0
         # Assertion disabled for perf reasons
         return self.observation
-
-    def initialize_observation(self):
-        """
-        Observation is a nd-array of shape (width, height, num_states)
-        where each AgentState will be marked in a separate challenge for each of the cells
-        """
-        self.observation = np.zeros((self.width, self.height, len(AgentState)))
-
-    def initialize_disease_planner(self, disease_planner="simple_seir"):
-        if disease_planner == "simple_seir":
-            self.disease_planner = \
-                SimpleSEIRDiseasePlanner(random=self.random)
-        elif disease_planner == "seir":
-            self.disease_planner = \
-                SEIRDiseasePlanner(random=self.random)
-        else:
-            raise NotImplementedError()
 
     def vaccinate_cell(self, cell_x, cell_y):
         """
@@ -159,9 +185,9 @@ class DiseaseSimModel(Model):
 
 if __name__ == "__main__":
     model = DiseaseSimModel(
-                    width=10,
-                    height=10,
-                    n_agents=40,
+                    width=40,
+                    height=40,
+                    n_agents=1500,
                     n_vaccines=100,
                     initial_infection_fraction=0.1,
                     initial_vaccination_fraction=0.05,

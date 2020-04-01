@@ -12,7 +12,6 @@ class CustomScheduler(RandomActivation):
     def __init__(self, model: Model) -> None:
         super().__init__(model)
 
-        #
         self._agent_state_index = {}
         for state in AgentState:
             self._agent_state_index[state] = {}

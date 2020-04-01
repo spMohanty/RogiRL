@@ -24,20 +24,32 @@ class DiseaseSimAgent(Agent):  # noqa
         self.moore = moore
 
         # self.state = self.random.choice([x for x in AgentState])
-        self.state = AgentState.SUSCEPTIBLE
         self.state_transition_plan = {} # Holds the state transition plan, with timestep as the key
+        
+        # Default State for Agents
+        self.state = AgentState.SUSCEPTIBLE
 
     def step(self):
         self.random_move()
         self.process_state_transitions()
+
+    def set_state(self, new_state:AgentState):
+        previous_state = self.state
+        self.state = new_state
+
+        # Update Agent State Registry in Scheduler
+        self.model.schedule.update_agent_state_in_registry(self, previous_state=previous_state)
+
+        # Update Global Observation in model observation buffer
+        self.model.observation[self.pos[0], self.pos[1], : ] = 0
+        self.model.observation[self.pos[0], self.pos[1], self.state.value ] = 1
+
     
     def process_state_transitions(self):
         try:
             _event = self.state_transition_plan[self.model.schedule.steps]
             assert self.state == _event.previous_state, "Mismatch in state during state_transition"
-            self.state = _event.new_state
-
-            self.model.schedule.update_agent_state_in_registry(self, _event.previous_state)
+            self.set_state(_event.new_state)
             _event.mark_as_executed()
         except KeyError:
             """
@@ -65,6 +77,19 @@ class DiseaseSimAgent(Agent):  # noqa
                     self.state_transition_plan[_agent_event.update_timestep] = _agent_event
                 self._is_infection_scheduled = True
 
+    def move_to(self, new_position):
+        """
+        Move the agent to a new location on the grid
+        and do other associated house keeping tasks
+            - Update global observation in model
+        """
+        # Clear up global observation cache in model at the previous coord
+        self.model.observation[self.pos[0], self.pos[1], : ] = 0
+        # Move Agent in Grid
+        self.model.grid.move_agent(self, new_position)
+        # Add a new entry in the global observation cache for the new position
+        self.model.observation[self.pos[0], self.pos[1], self.state.value ] = 1
+
     def random_move(self):        
         if self.random.random() < self.prob_agent_movement:
             # Find empty cells in neighborhood
@@ -78,10 +103,7 @@ class DiseaseSimAgent(Agent):  # noqa
                 new_position = self.random.choice(empty_cells_in_neighborhood)
                 # Move to a randomly selected empty cell in the neighborhood
 
-                # Update global observation vector
-                self.model.observation[self.pos[0], self.pos[1], : ] = 0
-                self.model.grid.move_agent(self, new_position)
-                self.model.observation[self.pos[0], self.pos[1], self.state.value ] = 1
+                self.move_to(new_position)
 
 
         
