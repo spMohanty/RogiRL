@@ -34,6 +34,12 @@ class CustomScheduler(RandomActivation):
         del self._agent_state_index[previous_state][agent.unique_id]
         self._agent_state_index[agent.state][agent.unique_id] = agent
 
+        ## Update the Model Observation 
+        # self.model.observation[agent.pos]
+        agent_x, agent_y = agent.pos
+        self.model.observation[agent_x, agent_y, previous_state.value] = 0
+        self.model.observation[agent_x, agent_y, agent.state.value] = 1
+
     def get_agents_by_state(self, state: AgentState):
         return list(self._agent_state_index[state].values())
 
