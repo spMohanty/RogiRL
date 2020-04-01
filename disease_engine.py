@@ -17,9 +17,9 @@ from disease_scheduler import SimpleSEIRDiseaseScheduler, SEIRDiseaseScheduler
 
 class DiseaseEngine:
     def __init__(   self, 
-                    grid_width=100, 
-                    grid_height=100, 
-                    n_agents=10,
+                    grid_width=50, 
+                    grid_height=50, 
+                    n_agents=1500,
                     n_vaccines=100,
                     initial_infection_fraction=0.2,
                     initial_vaccination_fraction=0.05,
@@ -320,20 +320,26 @@ if __name__ == "__main__":
     disease_engine = DiseaseEngine(
                             grid_width=50,
                             grid_height=50,
-                            n_agents=500,
+                            n_agents=1500,
                             n_vaccines=160,
                             initial_infection_fraction=0.1,
                             initial_vaccination_fraction=0.00,
-                            prob_infection=0.2,
+                            prob_infection=0.0,
                             prob_agent_movement=0.00,
                             disease_scheduler="simple_seir",
-                            use_renderer=True,
+                            use_renderer=False,
                             toric_grid=True,
                             seed=1001
                             )
     # print(disease_engine.grid)
     # print(disease_engine.grid.get_all_neighbours(Coordinate(0,0)))
+
     
+    for k in range(10):    
+        _time = time.time()
+        disease_engine.tick()
+        print(time.time() - _time)
+
     while True:
         renderer_actions = disease_engine.update_renderer()
         for _action in renderer_actions:
