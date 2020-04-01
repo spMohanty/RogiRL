@@ -11,12 +11,14 @@ try:
     from .disease_planner import SimpleSEIRDiseasePlanner, SEIRDiseasePlanner
     from .scheduler import CustomScheduler
     from .agent_state import AgentState
+    from .vaccination_response import VaccinationResponse
 except ImportError:
     from agent import DiseaseSimAgent
     from visualization import CustomTextGrid
     from disease_planner import SimpleSEIRDiseasePlanner, SEIRDiseasePlanner
     from scheduler import CustomScheduler
     from agent_state import AgentState
+    from vaccination_response import VaccinationResponse
     
 
 
@@ -156,7 +158,38 @@ class DiseaseSimModel(Model):
     def vaccinate_cell(self, cell_x, cell_y):
         """
         Vaccinates an agent at cell_x, cell_y, if present
+
+        Response with :
+        (is_vaccination_successful: boolean, vaccination_response: VaccinationResponse)
         """
+
+        # Case 1 : Cell is empty
+        if self.grid.is_cell_empty((cell_x, cell_y)):
+            return False, VaccinationResponse.CELL_EMPTY
+
+        agent = self.grid[cell_x][cell_y]
+        if agent.state == AgentState.SUSCEPTIBLE:
+            # Case 2 : Agent is susceptible, and can be vaccinated
+            agent.set_state(AgentState.VACCINATED)
+            return True, VaccinationResponse.VACCINATION_SUCCESS
+        elif agent.state == AgentState.EXPOSED:
+            # Case 3 : Agent is already exposed, and its a waste of vaccination
+            return False, VaccinationResponse.AGENT_EXPOSED
+        elif agent.state == AgentState.INFECTIOUS:
+            # Case 4 : Agent is already infectious, and its a waste of vaccination
+            return False, VaccinationResponse.AGENT_INFECTIOUS
+        elif agent.state == AgentState.SYMPTOMATIC:
+            # Case 5 : Agent is already Symptomatic, and its a waste of vaccination
+            return False, VaccinationResponse.AGENT_SYMPTOMATIC
+        elif agent.state == AgentState.RECOVERED:
+            # Case 6 : Agent is already Recovered, and its a waste of vaccination
+            return False, VaccinationResponse.AGENT_RECOVERED
+        elif agent.state == AgentState.VACCINATED:
+            # Case 7 : Agent is already Vaccination, and its a waste of vaccination
+            return False, VaccinationResponse.AGENT_VACCINATED
+
+
+
         raise NotImplementedError()
 
     def propagate_infections(self):
@@ -185,8 +218,8 @@ class DiseaseSimModel(Model):
 
 if __name__ == "__main__":
     model = DiseaseSimModel(
-                    width=40,
-                    height=40,
+                    width=50,
+                    height=50,
                     n_agents=1500,
                     n_vaccines=100,
                     initial_infection_fraction=0.1,
@@ -204,11 +237,17 @@ if __name__ == "__main__":
     import time
     import numpy as np
     per_step_times = []
-    for k in range(1000):
+    for k in range(100):
         _time = time.time()
         model.step()
         per_step_times.append(time.time() - _time)
         _obs = model.get_observation()
+
+        # Random Vaccinations
+        # random_x = model.random.choice(range(50))
+        # random_y = model.random.choice(range(50))
+        # print(model.vaccinate_cell(random_x, random_y))
+
         # print(per_step_times[-1])
         # print(model.datacollector.get_model_vars_dataframe())
         # print("S", model.schedule.get_agent_count_by_state(AgentState.SUSCEPTIBLE))
