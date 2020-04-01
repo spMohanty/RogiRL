@@ -150,10 +150,31 @@ class DiseaseSimModel(Model):
                 }
         )
 
+    ##########################################################################################
+    ##########################################################################################
+    # State Aggregation
+    #       - Functions for easy aggregation of simulation wide stats
+    ##########################################################################################
+
     def get_observation(self):
         # assert self.observation.sum(axis=-1).max() <= 1.0
         # Assertion disabled for perf reasons
         return self.observation
+
+
+    ##########################################################################################
+    ##########################################################################################
+    # Actions
+    #        - Functions for actions that can be performed on the model
+    ##########################################################################################
+
+    def step(self):
+        """
+        A model step. Used for collecting data and advancing the schedule
+        """
+        self.propagate_infections()
+        self.datacollector.collect(self)
+        self.schedule.step()
 
     def vaccinate_cell(self, cell_x, cell_y):
         """
@@ -187,12 +208,24 @@ class DiseaseSimModel(Model):
         elif agent.state == AgentState.VACCINATED:
             # Case 7 : Agent is already Vaccination, and its a waste of vaccination
             return False, VaccinationResponse.AGENT_VACCINATED
-
-
-
         raise NotImplementedError()
 
+    ##########################################################################################
+    ##########################################################################################
+    # Misc
+    ##########################################################################################
+
+    def tick(self):
+        """
+        a mirror function for the internal step function 
+        to help avoid confusion in the RL codebases (with the RL step)
+        """
+        self.step()
+
     def propagate_infections(self):
+        """
+        Propagates infection during a single simulation step
+        """
         valid_infectious_agents = []
         valid_infectious_agents += self.schedule.get_agents_by_state(AgentState.INFECTIOUS)
         valid_infectious_agents += self.schedule.get_agents_by_state(AgentState.SYMPTOMATIC)
@@ -208,13 +241,6 @@ class DiseaseSimModel(Model):
                 if _target_candidate.state == AgentState.SUSCEPTIBLE:
                     _target_candidate.trigger_infection(prob_infection=self.prob_infection)
 
-    def step(self):
-        """
-        A model step. Used for collecting data and advancing the schedule
-        """
-        self.propagate_infections()
-        self.datacollector.collect(self)
-        self.schedule.step()
 
 if __name__ == "__main__":
     model = DiseaseSimModel(
