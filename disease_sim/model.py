@@ -34,7 +34,7 @@ class DiseaseSimModel(Model):
                     height=50,
                     n_agents=1000,
                     n_vaccines=100,
-                    initial_infection_fraction=0.2,
+                    initial_infection_fraction=0.5,
                     initial_vaccination_fraction=0.05,
                     prob_infection=0.2,
                     prob_agent_movement=0.0,
@@ -59,7 +59,7 @@ class DiseaseSimModel(Model):
         self.max_timesteps = max_timesteps
         self.toric = toric
         self.seed  = seed 
-        
+
         self.schedule = CustomScheduler(self)
         self.initialize_disease_planner(disease_planner=disease_planner)
 
@@ -80,6 +80,7 @@ class DiseaseSimModel(Model):
             # Seed the infection in a fraction of the agents
             if self.random.random() < self.initial_infection_fraction:
                 agent.trigger_infection(prob_infection=1.0)
+                print("Triggering infection in agent : ", agent.unique_id)
 
         # example data collector
         self.datacollector = DataCollector(
@@ -99,23 +100,46 @@ class DiseaseSimModel(Model):
         else:
             raise NotImplementedError()
 
+    
+    def propagate_infections(self):
+        valid_infectious_agents = []
+        valid_infectious_agents += self.schedule.get_agents_by_state(AgentState.INFECTIOUS)
+        valid_infectious_agents += self.schedule.get_agents_by_state(AgentState.SYMPTOMATIC)
+
+        for _infectious_agent in valid_infectious_agents:
+            target_candidates = self.grid.get_neighbors(
+                pos = _infectious_agent.pos,
+                moore = self.moore, 
+                include_center = False,
+                radius = 1
+            )
+            for _target_candidate in target_candidates:
+                if _target_candidate.state == AgentState.SUSCEPTIBLE:
+                    print("Trying to infect : ", _target_candidate)
+                    self.trigger_infection(_target_candidate, prob_infection=self.prob_infection)
+                    _target_candidate.trigger_infection(prob_infection=self.prob_infection)
+
+
+            
+
 
     def step(self):
         """
         A model step. Used for collecting data and advancing the schedule
         """
+        self.propagate_infections()
         self.datacollector.collect(self)
         self.schedule.step()
 
 if __name__ == "__main__":
     model = DiseaseSimModel(
-                    width=50,
-                    height=50,
-                    n_agents=1000,
+                    width=4,
+                    height=4,
+                    n_agents=5,
                     n_vaccines=100,
                     initial_infection_fraction=0.2,
                     initial_vaccination_fraction=0.05,
-                    prob_infection=0.2,
+                    prob_infection=1.0,
                     prob_agent_movement=0.0,
                     disease_planner="simple_seir",
                     max_timesteps=200,
@@ -124,13 +148,15 @@ if __name__ == "__main__":
     
     viz = CustomTextGrid(model.grid)
     # print(viz.render())
-
+    
+    print(model.schedule._agent_state_index)
     import time
     for k in range(10):
         _time = time.time()
         model.step()
         print(time.time() - _time)
-        print(model.datacollector.get_model_vars_dataframe())
+        print(model.schedule._agent_state_index)
+        # print(model.datacollector.get_model_vars_dataframe())
         # print(viz.render())
 
 

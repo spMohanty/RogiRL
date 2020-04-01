@@ -29,6 +29,9 @@ class CustomScheduler(RandomActivation):
                 del self._agent_state_index[state][agent.unique_id]
             except KeyError:
                 pass
+    
+    def get_agents_by_state(self, state: AgentState):
+        return list(self._agent_state_index[state].values())
 
     def get_agent_count_by_state(self, state: AgentState) -> int:
         """ Returns the current number of agents in a particular state. """
