@@ -44,7 +44,6 @@ model_kwargs = {
                     "n_agents": 1000,
                     "width": grid_width,
                     "height": grid_height,
-                    "prob_agent_movement" : 0.1
                 }
 
 server = ModularServer(DiseaseSimModel, [canvas_element, chart_element],  # noqa

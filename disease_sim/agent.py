@@ -61,10 +61,7 @@ class DiseaseSimAgent(Agent):  # noqa
                         pass
                     # Mark the state transition plan for the said timestep
                     self.state_transition_plan[_agent_event.update_timestep] = _agent_event
-                
-                
-        
-        
+
     def random_move(self):        
         if self.random.random() < self.prob_agent_movement:
             # Find empty cells in neighborhood

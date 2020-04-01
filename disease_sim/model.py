@@ -7,10 +7,16 @@ try:
     from .agent import DiseaseSimAgent
     from .visualization import CustomTextGrid
     from .disease_planner import SimpleSEIRDiseasePlanner, SEIRDiseasePlanner
+    from .scheduler import CustomScheduler
+    from .agent_state import AgentState
 except ImportError:
     from agent import DiseaseSimAgent
     from visualization import CustomTextGrid
     from disease_planner import SimpleSEIRDiseasePlanner, SEIRDiseasePlanner
+    from scheduler import CustomScheduler
+    from agent_state import AgentState
+    
+
 
 class DiseaseSimModel(Model):
     """
@@ -24,14 +30,14 @@ class DiseaseSimModel(Model):
     """
 
     def __init__(   self, 
-                    width=3, 
-                    height=3,
-                    n_agents=1,
+                    width=50, 
+                    height=50,
+                    n_agents=1000,
                     n_vaccines=100,
                     initial_infection_fraction=0.2,
                     initial_vaccination_fraction=0.05,
                     prob_infection=0.2,
-                    prob_agent_movement=0.1,
+                    prob_agent_movement=0.0,
                     disease_planner="simple_seir",
                     max_timesteps=200,
                     toric=True,
@@ -54,7 +60,7 @@ class DiseaseSimModel(Model):
         self.toric = toric
         self.seed  = seed 
         
-        self.schedule = RandomActivation(self)
+        self.schedule = CustomScheduler(self)
         self.initialize_disease_planner(disease_planner=disease_planner)
 
         self.grid = SingleGrid(width=width, height=height, torus=self.toric)
@@ -77,7 +83,7 @@ class DiseaseSimModel(Model):
 
         # example data collector
         self.datacollector = DataCollector(
-            # model_reporters = {"rand" : lambda x : self.random.random()}
+            model_reporters = {"susceptible_frac" : lambda m: m.schedule.get_agent_fraction_by_state(AgentState.SUSCEPTIBLE)}
         )
 
         self.running = True
@@ -111,7 +117,7 @@ if __name__ == "__main__":
                     initial_vaccination_fraction=0.05,
                     prob_infection=0.2,
                     prob_agent_movement=0.0,
-                    disease_scheduler="simple_seir",
+                    disease_planner="simple_seir",
                     max_timesteps=200,
                     toric=True)
 
@@ -124,7 +130,7 @@ if __name__ == "__main__":
         _time = time.time()
         model.step()
         print(time.time() - _time)
-        # print(model.datacollector.get_model_vars_dataframe())
+        print(model.datacollector.get_model_vars_dataframe())
         # print(viz.render())
 
 
