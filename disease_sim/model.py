@@ -68,7 +68,10 @@ class DiseaseSimModel(Model):
         self.initialize_disease_planner(disease_planner=disease_planner)
         self.initialize_scheduler()
         self.initialize_grid()
-        self.initialize_agents(infection_fraction=self.initial_infection_fraction)
+        self.initialize_agents(
+            infection_fraction=self.initial_infection_fraction,
+            vaccination_fraction=self.initial_vaccination_fraction
+            )
         self.initialize_datacollector()
         self.running = True
         self.datacollector.collect(self)
@@ -109,7 +112,7 @@ class DiseaseSimModel(Model):
         """
         self.grid = SingleGrid(width=self.width, height=self.height, torus=self.toric)
 
-    def initialize_agents(self, infection_fraction):
+    def initialize_agents(self, infection_fraction, vaccination_fraction):
         """
         Intializes the intial agents on the grid
         """
@@ -118,6 +121,7 @@ class DiseaseSimModel(Model):
         
         # Assess the number of agents that have to be infected (the seed infection)
         number_of_agents_to_infect = int(infection_fraction * self.n_agents)
+        number_of_agents_to_vaccinate = int(vaccination_fraction * self.n_agents)
 
         for i in range(self.n_agents):
             agent = DiseaseSimAgent(
@@ -136,6 +140,10 @@ class DiseaseSimModel(Model):
             # Seed the infection in a fraction of the agents
             if i < number_of_agents_to_infect:
                 agent.trigger_infection(prob_infection=1.0)
+            
+            # Seed the vaccination in a fraction of the agents
+            if i >= number_of_agents_to_infect and i < (number_of_agents_to_infect + number_of_agents_to_vaccinate):
+                agent.set_state(AgentState.VACCINATED)
 
     def initialize_datacollector(self):
         """
