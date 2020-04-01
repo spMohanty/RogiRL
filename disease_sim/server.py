@@ -21,10 +21,9 @@ def agent_potrayal(agent):
         return
 
     portrayal = {
-                    "Shape": "rect",
+                    "Shape": "circle",
                     "Filled": "true",
-                    "w" : 0.8,
-                    "h" : 0.8,
+                    "r" : 0.9,
                     "id" : agent.unique_id,
                     "state" : agent.state.name,
                     "Layer" : 0,
