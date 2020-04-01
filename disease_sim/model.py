@@ -127,7 +127,12 @@ class DiseaseSimModel(Model):
         else:
             raise NotImplementedError()
 
-    
+    def vaccinate_cell(self, cell_x, cell_y):
+        """
+        Vaccinates an agent at cell_x, cell_y, if present
+        """
+        raise NotImplementedError()
+
     def propagate_infections(self):
         valid_infectious_agents = []
         valid_infectious_agents += self.schedule.get_agents_by_state(AgentState.INFECTIOUS)
@@ -154,9 +159,9 @@ class DiseaseSimModel(Model):
 
 if __name__ == "__main__":
     model = DiseaseSimModel(
-                    width=50,
-                    height=50,
-                    n_agents=1000,
+                    width=10,
+                    height=10,
+                    n_agents=40,
                     n_vaccines=100,
                     initial_infection_fraction=0.1,
                     initial_vaccination_fraction=0.05,
@@ -177,8 +182,8 @@ if __name__ == "__main__":
         _time = time.time()
         model.step()
         per_step_times.append(time.time() - _time)
-        _obs = model.get_observation
-        print(per_step_times[-1])
+        _obs = model.get_observation()
+        # print(per_step_times[-1])
         # print(model.datacollector.get_model_vars_dataframe())
         # print("S", model.schedule.get_agent_count_by_state(AgentState.SUSCEPTIBLE))
         # print("E", model.schedule.get_agent_count_by_state(AgentState.EXPOSED))

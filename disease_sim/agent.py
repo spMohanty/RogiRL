@@ -77,7 +77,11 @@ class DiseaseSimAgent(Agent):  # noqa
             if len(empty_cells_in_neighborhood) > 0:
                 new_position = self.random.choice(empty_cells_in_neighborhood)
                 # Move to a randomly selected empty cell in the neighborhood
+
+                # Update global observation vector
+                self.model.observation[self.pos[0], self.pos[1], : ] = 0
                 self.model.grid.move_agent(self, new_position)
+                self.model.observation[self.pos[0], self.pos[1], self.state.value ] = 1
 
 
         
