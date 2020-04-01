@@ -143,10 +143,12 @@ class DiseaseSimModel(Model):
         """
         self.datacollector = DataCollector(
             model_reporters = {
-                    "susceptible_frac" : lambda m: m.schedule.get_agent_fraction_by_state(AgentState.SUSCEPTIBLE),
-                    "exposed_frac" : lambda m: m.schedule.get_agent_fraction_by_state(AgentState.EXPOSED),
-                    "infectious_frac" : lambda m: m.schedule.get_agent_fraction_by_state(AgentState.INFECTIOUS),
-                    "recovered_frac" : lambda m: m.schedule.get_agent_fraction_by_state(AgentState.RECOVERED),
+                    "susceptible_frac" : lambda m: m.get_population_fraction_by_state(AgentState.SUSCEPTIBLE),
+                    "exposed_frac" : lambda m: m.get_population_fraction_by_state(AgentState.EXPOSED),
+                    "infectious_frac" : lambda m: m.get_population_fraction_by_state(AgentState.INFECTIOUS),
+                    "symptomatic_frac" : lambda m: m.get_population_fraction_by_state(AgentState.SYMPTOMATIC),
+                    "recovered_frac" : lambda m: m.get_population_fraction_by_state(AgentState.RECOVERED),
+                    "vaccinated_frac" : lambda m: m.get_population_fraction_by_state(AgentState.VACCINATED)
                 }
         )
 
@@ -161,6 +163,8 @@ class DiseaseSimModel(Model):
         # Assertion disabled for perf reasons
         return self.observation
 
+    def get_population_fraction_by_state(self, state: AgentState):
+        return self.schedule.get_agent_fraction_by_state(state)
 
     ##########################################################################################
     ##########################################################################################
@@ -268,6 +272,7 @@ if __name__ == "__main__":
         model.step()
         per_step_times.append(time.time() - _time)
         _obs = model.get_observation()
+        print(model.get_population_fraction_by_state(AgentState.SUSCEPTIBLE))
 
         # Random Vaccinations
         # random_x = model.random.choice(range(50))
