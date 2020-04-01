@@ -5,9 +5,10 @@ Configure visualization elements and instantiate a server
 try:
     from disease_sim.model import DiseaseSimModel, DiseaseSimAgent  # noqa
     from disease_sim.colors import ColorMap
+    from disease_sim.agent_state import AgentState
 except ImportError:
     from model import DiseaseSimModel, DiseaseSimAgent  # noqa
-    from colors import ColorMap
+    from agent_state import AgentState
 
 from mesa.visualization.ModularVisualization import ModularServer
 from mesa.visualization.modules import CanvasGrid, ChartModule
@@ -38,7 +39,32 @@ canvas_width = 500
 canvas_height = 500
 
 canvas_element = CanvasGrid(agent_potrayal, grid_width, grid_height, canvas_width, canvas_height)
-chart_element = ChartModule([{"Label": "DiseaseSim", "Color": "Pink"}])
+chart_element = ChartModule([
+                                {
+                                    "Label": "Susceptible", 
+                                    "Color": "rgb{}".format(COLOR_MAP.get_color(AgentState.SUSCEPTIBLE))
+                                },
+                                {
+                                    "Label": "Exposed", 
+                                    "Color": "rgb{}".format(COLOR_MAP.get_color(AgentState.EXPOSED))
+                                },
+                                {
+                                    "Label": "Infectious", 
+                                    "Color": "rgb{}".format(COLOR_MAP.get_color(AgentState.INFECTIOUS))
+                                },
+                                {
+                                    "Label": "Symptomatic", 
+                                    "Color": "rgb{}".format(COLOR_MAP.get_color(AgentState.SYMPTOMATIC))
+                                },
+                                {
+                                    "Label": "Recovered", 
+                                    "Color": "rgb{}".format(COLOR_MAP.get_color(AgentState.RECOVERED))
+                                },
+                                {
+                                    "Label": "Vaccinated", 
+                                    "Color": "rgb{}".format(COLOR_MAP.get_color(AgentState.VACCINATED))
+                                }
+                            ])
 
 model_kwargs = {
                     "n_agents": 1000,

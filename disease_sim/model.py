@@ -143,12 +143,12 @@ class DiseaseSimModel(Model):
         """
         self.datacollector = DataCollector(
             model_reporters = {
-                    "susceptible_frac" : lambda m: m.get_population_fraction_by_state(AgentState.SUSCEPTIBLE),
-                    "exposed_frac" : lambda m: m.get_population_fraction_by_state(AgentState.EXPOSED),
-                    "infectious_frac" : lambda m: m.get_population_fraction_by_state(AgentState.INFECTIOUS),
-                    "symptomatic_frac" : lambda m: m.get_population_fraction_by_state(AgentState.SYMPTOMATIC),
-                    "recovered_frac" : lambda m: m.get_population_fraction_by_state(AgentState.RECOVERED),
-                    "vaccinated_frac" : lambda m: m.get_population_fraction_by_state(AgentState.VACCINATED)
+                    "Susceptible" : lambda m: m.get_population_fraction_by_state(AgentState.SUSCEPTIBLE),
+                    "Exposed" : lambda m: m.get_population_fraction_by_state(AgentState.EXPOSED),
+                    "Infectious" : lambda m: m.get_population_fraction_by_state(AgentState.INFECTIOUS),
+                    "Symptomatic" : lambda m: m.get_population_fraction_by_state(AgentState.SYMPTOMATIC),
+                    "Recovered" : lambda m: m.get_population_fraction_by_state(AgentState.RECOVERED),
+                    "Vaccinated" : lambda m: m.get_population_fraction_by_state(AgentState.VACCINATED)
                 }
         )
 
@@ -272,7 +272,7 @@ if __name__ == "__main__":
         model.step()
         per_step_times.append(time.time() - _time)
         _obs = model.get_observation()
-        print(model.get_population_fraction_by_state(AgentState.SUSCEPTIBLE))
+        # print(model.get_population_fraction_by_state(AgentState.SUSCEPTIBLE))
 
         # Random Vaccinations
         # random_x = model.random.choice(range(50))
