@@ -39,6 +39,7 @@ class DiseaseSimEnv(gym.Env):
                         "recovery_period_sigma" :  0,
                     },
                     max_timesteps=200,
+                    early_stopping_patience=14,
                     toric=True,
                     debug=True)
         self.config = {}
@@ -77,6 +78,7 @@ class DiseaseSimEnv(gym.Env):
         prob_agent_movement = self.config['prob_agent_movement']
         disease_planner_config = self.config['disease_planner_config']
         max_timesteps = self.config['max_timesteps']
+        early_stopping_patience=self.config['early_stopping_patience']
         toric = self.config['toric']
         debug = self.config['debug']
 
@@ -98,7 +100,7 @@ class DiseaseSimEnv(gym.Env):
             initial_infection_fraction, initial_vaccination_fraction,
             prob_infection, prob_agent_movement,
             disease_planner_config, 
-            max_timesteps, 
+            max_timesteps, early_stopping_patience,
             toric, seed = _simulator_instance_seed
         )
         # Tick model
@@ -204,13 +206,16 @@ if __name__ == "__main__":
                         "recovery_period_sigma" :  0,
                     },
                     max_timesteps=200,
+                    early_stopping_patience=14,
                     toric=True,
                     debug=True)
     env = DiseaseSimEnv(config=env_config)
     observation = env.reset()
-    for k in range(100):
+    done = False
+    k = 0
+    while not done:
         observation, reward, done, info = env.step(env.action_space.sample())
-        print("Step : ", k)
+        k += 1
         # print(observation.shape)
-        print(reward, done)
+        print(k, reward, done)
     # print(observation.shape())

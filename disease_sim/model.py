@@ -51,6 +51,7 @@ class DiseaseSimModel(Model):
                         "recovery_period_sigma" :  0,
                     },                    
                     max_timesteps=200,
+                    early_stopping_patience = 14,
                     toric=True,
                     seed = None
                     ):
@@ -73,6 +74,7 @@ class DiseaseSimModel(Model):
         self.disease_planner_config = disease_planner_config
 
         self.max_timesteps = max_timesteps
+        self.early_stopping_patience = early_stopping_patience
         self.toric = toric
         self.seed  = seed 
 
@@ -212,6 +214,7 @@ class DiseaseSimModel(Model):
         self.propagate_infections()
         self.datacollector.collect(self)
         self.schedule.step()
+        self.simulation_completion_checks()
 
     def vaccinate_cell(self, cell_x, cell_y):
         """
@@ -257,11 +260,31 @@ class DiseaseSimModel(Model):
     # Misc
     ##########################################################################################
 
-    def check_if_simulation_is_complete(self):
+    def simulation_completion_checks(self):
         """
-        Simulation is complete if 
+        Simulation is complete if :
+            - if the timesteps have exceeded the number of max_timesteps
+            or
+            - the fraction of susceptible population is <= 0
+            or
+            - the fraction of susceptible population has not changed since the last N timesteps
         """
-        return not self.running
+        print(self.schedule.steps, self.max_timesteps)
+        if self.schedule.steps > self.max_timesteps - 1:
+            self.running = False
+            return
+        
+        susceptible_population = self.get_population_fraction_by_state(AgentState.SUSCEPTIBLE)
+        if susceptible_population <= 0:
+            self.running = False
+            return
+        
+        if self.schedule.steps > self.early_stopping_patience:
+            last_N_susceptible_population = \
+                self.datacollector.model_vars["Susceptible"][-1 * self.early_stopping_patience : ]
+            if len(set(last_N_susceptible_population)) == 1:
+                self.running = False
+                return
 
     def tick(self):
         """
@@ -294,9 +317,9 @@ if __name__ == "__main__":
     model = DiseaseSimModel(
                     width=50,
                     height=50,
-                    population_density=0.75,
+                    population_density=0.99,
                     vaccine_density=0.0,
-                    initial_infection_fraction=0.1,
+                    initial_infection_fraction=0.99,
                     initial_vaccination_fraction=0.0,
                     prob_infection=1.0,
                     prob_agent_movement=0.0,
@@ -308,7 +331,8 @@ if __name__ == "__main__":
                         "recovery_period_mu" :  14 * 4,
                         "recovery_period_sigma" :  0,
                     },                    
-                    max_timesteps=200,
+                    max_timesteps=5,
+                    early_stopping_patience = 14,
                     toric=True)
     
     import time
