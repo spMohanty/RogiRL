@@ -36,10 +36,10 @@ class DiseaseSimModel(Model):
     def __init__(   self, 
                     width=50, 
                     height=50,
-                    n_agents=1000,
-                    n_vaccines=100,
+                    population_density=0.75,
+                    vaccine_density=0,
                     initial_infection_fraction=0.5,
-                    initial_vaccination_fraction=0.05,
+                    initial_vaccination_fraction=0.00,
                     prob_infection=0.2,
                     prob_agent_movement=0.0,
                     disease_planner="simple_seir",
@@ -51,8 +51,11 @@ class DiseaseSimModel(Model):
 
         self.width = width
         self.height = height
-        self.n_agents = n_agents
-        self.n_vaccines = n_vaccines
+        self.population_density = population_density # fraction of the whole grid that is initiailized with agents 
+        self.vaccine_density = vaccine_density # 
+
+        self.n_agents = False
+        self.n_vaccines = False
 
         self.initial_infection_fraction = initial_infection_fraction
         self.initial_vaccination_fraction = initial_vaccination_fraction
@@ -116,9 +119,14 @@ class DiseaseSimModel(Model):
         """
         Intializes the intial agents on the grid
         """
-        assert self.n_agents <= self.width * self.height, \
-            "More number of agents requested than the actual space available"
+        assert 0 < self.population_density <= 1, \
+            "population_density should be between (0, 1]"
         
+        # Assess the actual population
+        self.n_agents = int(self.width * self.height * self.population_density)
+        # Assess the available number of vaccines
+        self.n_vaccines = int(self.n_agents * self.vaccine_density)
+
         # Assess the number of agents that have to be infected (the seed infection)
         number_of_agents_to_infect = int(infection_fraction * self.n_agents)
         number_of_agents_to_vaccinate = int(vaccination_fraction * self.n_agents)
@@ -195,6 +203,11 @@ class DiseaseSimModel(Model):
         Response with :
         (is_vaccination_successful: boolean, vaccination_response: VaccinationResponse)
         """
+        
+        # Case 0 : No vaccines left
+        if self.n_vaccines <= 0:
+            return False, VaccinationResponse.AGENT_VACCINES_EXHAUSTED
+        self.n_vaccines -= 1
 
         # Case 1 : Cell is empty
         if self.grid.is_cell_empty((cell_x, cell_y)):
@@ -258,10 +271,10 @@ if __name__ == "__main__":
     model = DiseaseSimModel(
                     width=50,
                     height=50,
-                    n_agents=1500,
-                    n_vaccines=100,
+                    population_density=0.75,
+                    vaccine_density=0.0,
                     initial_infection_fraction=0.1,
-                    initial_vaccination_fraction=0.05,
+                    initial_vaccination_fraction=0.0,
                     prob_infection=1.0,
                     prob_agent_movement=0.0,
                     disease_planner="simple_seir",

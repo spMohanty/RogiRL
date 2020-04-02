@@ -22,7 +22,7 @@ class DiseaseSimEnv(gym.Env):
     def __init__(   self, 
                     width=50, 
                     height=50,
-                    n_agents=1000,
+                    population_density=0.75,
                     n_vaccines=100,
                     initial_infection_fraction=0.5,
                     initial_vaccination_fraction=0.05,
@@ -35,7 +35,7 @@ class DiseaseSimEnv(gym.Env):
                     ):
         self.width = width
         self.height = height
-        self.n_agents = n_agents
+        self.population_density = population_density
         self.n_vaccines = n_vaccines
 
         self.initial_infection_fraction = initial_infection_fraction
@@ -65,7 +65,7 @@ class DiseaseSimEnv(gym.Env):
     def reset(  self,
                 width=None, 
                 height=None,
-                n_agents=None,
+                population_density=None,
                 n_vaccines=None,
                 initial_infection_fraction=None,
                 initial_vaccination_fraction=None,
@@ -82,7 +82,7 @@ class DiseaseSimEnv(gym.Env):
         # Replace reset parameters with default parameters if they are not provided
         if width == None: width = self.width
         if height == None: height = self.height
-        if n_agents == None: n_agents = self.n_agents
+        if population_density == None: population_density = self.population_density
         if n_vaccines == None: n_vaccines = self.n_vaccines
         if initial_infection_fraction == None: initial_infection_fraction = self.initial_infection_fraction
         if initial_vaccination_fraction == None: initial_vaccination_fraction = self.initial_vaccination_fraction
@@ -106,7 +106,7 @@ class DiseaseSimEnv(gym.Env):
         # Instantiate Disease Model
         self._model = DiseaseSimModel(
             width, height, 
-            n_agents, n_vaccines,
+            population_density, n_vaccines,
             initial_infection_fraction, initial_vaccination_fraction,
             prob_infection, prob_agent_movement,
             disease_planner, 
@@ -147,7 +147,8 @@ class DiseaseSimEnv(gym.Env):
         return _d
 
     def step(self, action):
-        assert self.action_space.contains(action), "Invalid action provided !"
+        assert self.action_space.contains(
+            action), "%r (%s) invalid" % (action, type(action))        
         if self._model == None:
             raise Exception("env.step() called before calling env.reset()")
         
@@ -201,7 +202,7 @@ if __name__ == "__main__":
 
     env = DiseaseSimEnv(
             width=50, height=50,
-            n_agents=1500,
+            population_density=0.75,
             prob_agent_movement=0,
             debug=True
             )

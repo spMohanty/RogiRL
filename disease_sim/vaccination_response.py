@@ -9,3 +9,4 @@ class VaccinationResponse(Enum):
     AGENT_SYMPTOMATIC = 4
     AGENT_RECOVERED = 5
     AGENT_VACCINATED = 6
+    AGENT_VACCINES_EXHAUSTED = 7
