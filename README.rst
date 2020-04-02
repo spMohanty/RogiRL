@@ -13,10 +13,39 @@ Rogi RL
         :target: https://rogi-rl.readthedocs.io/en/latest/?badge=latest
         :alt: Documentation Status
 
+|
+
+.. image:: https://i.imgur.com/tvuQdcz.png
+        :target: https://i.imgur.com/tvuQdcz.png
+        :alt: rogi-rl-logop
+
+A simple Gym environment for RL experiments around disease transmission in a grid world environment.
+
+***************
+Installation
+***************
+.. highlight:: bash
+.. code-block:: 
+        pip install -U git+https://github.com/spMohanty/rogi_rl.git
+        rogi-rl-demo
 
 
+***************
+Usage
+***************
+.. highlight:: python
+.. code-block:: 
+        #! /usr/bin/env python
+        
+        from rogi_rl import RogiSimEnv
+        
+        env = RogiSimEnv()
 
-Reinforcement Learning on Disease Transmission
+        observation = env.reset()
+        done = False
+        while not done:
+            observation, reward, done, info = env.step(env.action_space.sample())
+
 
 
 * Free software: GNU General Public License v3
@@ -28,3 +57,4 @@ Features
 
 * TODO
 
+  
