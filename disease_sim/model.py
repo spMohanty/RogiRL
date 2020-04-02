@@ -126,10 +126,14 @@ class DiseaseSimModel(Model):
         self.n_agents = int(self.width * self.height * self.population_density)
         # Assess the available number of vaccines
         self.n_vaccines = int(self.n_agents * self.vaccine_density)
+        
 
         # Assess the number of agents that have to be infected (the seed infection)
         number_of_agents_to_infect = int(infection_fraction * self.n_agents)
         number_of_agents_to_vaccinate = int(vaccination_fraction * self.n_agents)
+
+        # Assess the maximum number of vaccines available in the whole simulation
+        self.max_vaccines = self.n_vaccines + number_of_agents_to_vaccinate
 
         for i in range(self.n_agents):
             agent = DiseaseSimAgent(
@@ -171,7 +175,7 @@ class DiseaseSimModel(Model):
     ##########################################################################################
     ##########################################################################################
     # State Aggregation
-    #       - Functions for easy aggregation of simulation wide stats
+    #       - Functions for easy access/aggregation of simulation wide state
     ##########################################################################################
 
     def get_observation(self):
@@ -181,6 +185,9 @@ class DiseaseSimModel(Model):
 
     def get_population_fraction_by_state(self, state: AgentState):
         return self.schedule.get_agent_fraction_by_state(state)
+
+    def is_running(self):
+        return self.running
 
     ##########################################################################################
     ##########################################################################################

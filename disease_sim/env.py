@@ -145,23 +145,21 @@ class DiseaseSimEnv(gym.Env):
         if action_type == ActionType.STEP.value:
             self._model.tick()
             _observation = self._model.get_observation()
-            _done = self._model.running            
         elif action_type == ActionType.VACCINATE.value:
             vaccination_success, response = self._model.vaccinate_cell(cell_x, cell_y)
             _observation = self._model.get_observation()
-            _done = self._model.running
 
         # Compute difference in game score
         current_score = self.get_current_game_score()
         _step_reward = current_score - self.running_score
-        self.running_score = self.get_current_game_score()
+        self.running_score = current_score
 
         # Add custom game metrics to info key
         game_metrics = self.get_current_game_metrics()
         for _key in game_metrics.keys():
             _info[_key] = game_metrics[_key]
 
-        _done = not self._model.running 
+        _done = not self._model.is_running() 
         return _observation, _step_reward, _done, _info
 
     def seed(self, seed=None):
