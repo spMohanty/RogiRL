@@ -22,7 +22,7 @@ class RogiSimEnv(gym.Env):
                     width=50, 
                     height=50,
                     population_density=0.75,
-                    n_vaccines=100,
+                    vaccine_density=0.05,
                     initial_infection_fraction=0.1,
                     initial_vaccination_fraction=0.05,
                     prob_infection=0.2,
@@ -68,7 +68,7 @@ class RogiSimEnv(gym.Env):
         width = self.config['width']
         height = self.config['height']
         population_density = self.config['population_density']
-        n_vaccines = self.config['n_vaccines']
+        vaccine_density = self.config['vaccine_density']
         initial_infection_fraction = self.config['initial_infection_fraction']
         initial_vaccination_fraction = self.config['initial_vaccination_fraction']
         prob_infection = self.config['prob_infection']
@@ -93,7 +93,7 @@ class RogiSimEnv(gym.Env):
         # Instantiate Disease Model
         self._model = DiseaseSimModel(
             width, height, 
-            population_density, n_vaccines,
+            population_density, vaccine_density,
             initial_infection_fraction, initial_vaccination_fraction,
             prob_infection, prob_agent_movement,
             disease_planner_config, 
@@ -189,7 +189,7 @@ if __name__ == "__main__":
                     width=50, 
                     height=50,
                     population_density=0.75,
-                    n_vaccines=100,
+                    vaccine_density=0.05,
                     initial_infection_fraction=0.1,
                     initial_vaccination_fraction=0.05,
                     prob_infection=0.2,
