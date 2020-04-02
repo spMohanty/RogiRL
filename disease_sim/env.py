@@ -26,17 +26,26 @@ class DiseaseSimEnv(gym.Env):
                     height=50,
                     population_density=0.75,
                     n_vaccines=100,
-                    initial_infection_fraction=0.5,
+                    initial_infection_fraction=0.1,
                     initial_vaccination_fraction=0.05,
                     prob_infection=0.2,
                     prob_agent_movement=0.0,
-                    disease_planner="simple_seir",
+                    disease_planner_config={
+                        "latent_period_mu" :  2 * 4,
+                        "latent_period_sigma" :  0,
+                        "incubation_period_mu" :  5 * 4,
+                        "incubation_period_sigma" :  0,
+                        "recovery_period_mu" :  14 * 4,
+                        "recovery_period_sigma" :  0,
+                    },
                     max_timesteps=200,
                     toric=True,
                     debug=True)
         self.config = {}
         self.config.update(self.default_config)
         self.config.update(config)
+        
+        self.debug = config["debug"]
 
         self.width = self.config["width"]
         self.height = self.config["height"]
@@ -66,7 +75,7 @@ class DiseaseSimEnv(gym.Env):
         initial_vaccination_fraction = self.config['initial_vaccination_fraction']
         prob_infection = self.config['prob_infection']
         prob_agent_movement = self.config['prob_agent_movement']
-        disease_planner = self.config['disease_planner']
+        disease_planner_config = self.config['disease_planner_config']
         max_timesteps = self.config['max_timesteps']
         toric = self.config['toric']
         debug = self.config['debug']
@@ -88,7 +97,7 @@ class DiseaseSimEnv(gym.Env):
             population_density, n_vaccines,
             initial_infection_fraction, initial_vaccination_fraction,
             prob_infection, prob_agent_movement,
-            disease_planner, 
+            disease_planner_config, 
             max_timesteps, 
             toric, seed = _simulator_instance_seed
         )
@@ -178,11 +187,25 @@ class DiseaseSimEnv(gym.Env):
 if __name__ == "__main__":
 
     env_config = dict(
-            width=50, height=50,
-            population_density=0.75,
-            prob_agent_movement=0,
-            debug=True
-    )
+                    width=50, 
+                    height=50,
+                    population_density=0.75,
+                    n_vaccines=100,
+                    initial_infection_fraction=0.1,
+                    initial_vaccination_fraction=0.05,
+                    prob_infection=0.2,
+                    prob_agent_movement=0.0,
+                    disease_planner_config={
+                        "latent_period_mu" :  2 * 4,
+                        "latent_period_sigma" :  0,
+                        "incubation_period_mu" :  5 * 4,
+                        "incubation_period_sigma" :  0,
+                        "recovery_period_mu" :  14 * 4,
+                        "recovery_period_sigma" :  0,
+                    },
+                    max_timesteps=200,
+                    toric=True,
+                    debug=True)
     env = DiseaseSimEnv(config=env_config)
     observation = env.reset()
     for k in range(100):

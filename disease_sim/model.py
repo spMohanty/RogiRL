@@ -8,14 +8,14 @@ import numpy as np
 try:
     from .agent import DiseaseSimAgent
     from .visualization import CustomTextGrid
-    from .disease_planner import SimpleSEIRDiseasePlanner, SEIRDiseasePlanner
+    from .disease_planner import SEIRDiseasePlanner
     from .scheduler import CustomScheduler
     from .agent_state import AgentState
     from .vaccination_response import VaccinationResponse
 except ImportError:
     from agent import DiseaseSimAgent
     from visualization import CustomTextGrid
-    from disease_planner import SimpleSEIRDiseasePlanner, SEIRDiseasePlanner
+    from disease_planner import SEIRDiseasePlanner
     from scheduler import CustomScheduler
     from agent_state import AgentState
     from vaccination_response import VaccinationResponse
@@ -38,11 +38,18 @@ class DiseaseSimModel(Model):
                     height=50,
                     population_density=0.75,
                     vaccine_density=0,
-                    initial_infection_fraction=0.5,
+                    initial_infection_fraction=0.1,
                     initial_vaccination_fraction=0.00,
                     prob_infection=0.2,
                     prob_agent_movement=0.0,
-                    disease_planner="simple_seir",
+                    disease_planner_config={
+                        "latent_period_mu" :  2 * 4,
+                        "latent_period_sigma" :  0,
+                        "incubation_period_mu" :  5 * 4,
+                        "incubation_period_sigma" :  0,
+                        "recovery_period_mu" :  14 * 4,
+                        "recovery_period_sigma" :  0,
+                    },                    
                     max_timesteps=200,
                     toric=True,
                     seed = None
@@ -62,13 +69,15 @@ class DiseaseSimModel(Model):
 
         self.prob_infection = prob_infection
         self.prob_agent_movement = prob_agent_movement
+        
+        self.disease_planner_config = disease_planner_config
 
         self.max_timesteps = max_timesteps
         self.toric = toric
         self.seed  = seed 
 
         self.initialize_observation()
-        self.initialize_disease_planner(disease_planner=disease_planner)
+        self.initialize_disease_planner()
         self.initialize_scheduler()
         self.initialize_grid()
         self.initialize_agents(
@@ -90,18 +99,19 @@ class DiseaseSimModel(Model):
         """
         self.observation = np.zeros((self.width, self.height, len(AgentState)))
 
-    def initialize_disease_planner(self, disease_planner="simple_seir"):
+    def initialize_disease_planner(self):
         """
         Initializes a disease planner that the Agents can use to "schedule" infection progressions
         """
-        if disease_planner == "simple_seir":
-            self.disease_planner = \
-                SimpleSEIRDiseasePlanner(random=self.random)
-        elif disease_planner == "seir":
-            self.disease_planner = \
-                SEIRDiseasePlanner(random=self.random)
-        else:
-            raise NotImplementedError()
+        self.disease_planner = SEIRDiseasePlanner(
+                        latent_period_mu = self.disease_planner_config["latent_period_mu"],
+                        latent_period_sigma = self.disease_planner_config["latent_period_sigma"],
+                        incubation_period_mu = self.disease_planner_config["incubation_period_mu"],
+                        incubation_period_sigma = self.disease_planner_config["incubation_period_sigma"],
+                        recovery_period_mu = self.disease_planner_config["recovery_period_mu"],
+                        recovery_period_sigma = self.disease_planner_config["recovery_period_sigma"]
+        )
+
 
     def initialize_scheduler(self):
         """
@@ -247,6 +257,12 @@ class DiseaseSimModel(Model):
     # Misc
     ##########################################################################################
 
+    def check_if_simulation_is_complete(self):
+        """
+        Simulation is complete if 
+        """
+        return not self.running
+
     def tick(self):
         """
         a mirror function for the internal step function 
@@ -284,13 +300,16 @@ if __name__ == "__main__":
                     initial_vaccination_fraction=0.0,
                     prob_infection=1.0,
                     prob_agent_movement=0.0,
-                    disease_planner="simple_seir",
+                    disease_planner_config={
+                        "latent_period_mu" :  2 * 4,
+                        "latent_period_sigma" :  0,
+                        "incubation_period_mu" :  5 * 4,
+                        "incubation_period_sigma" :  0,
+                        "recovery_period_mu" :  14 * 4,
+                        "recovery_period_sigma" :  0,
+                    },                    
                     max_timesteps=200,
                     toric=True)
-
-    
-    viz = CustomTextGrid(model.grid)
-    # print(viz.render())
     
     import time
     import numpy as np
