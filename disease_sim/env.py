@@ -185,7 +185,8 @@ class DiseaseSimEnv(gym.Env):
         return _observation, _step_reward, _done, _info
 
     def seed(self, seed=None):
-        self.np_random.seed(seed)
+        self.np_random, seed = seeding.np_random(seed)
+        return [seed]
 
     def render(self, mode='human', close=False):
         """
