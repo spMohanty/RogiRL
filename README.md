@@ -14,14 +14,14 @@ A simple Gym environment for RL experiments around disease transmission in a gri
 ## Installation
 
 
-```
+``` bash
 pip install -U git+https://github.com/spMohanty/rogi_rl.git
 rogi-rl-demo
 ```
 
 ## Usage
 
-```
+``` python
 #! /usr/bin/env python
 
 from rogi_rl import RogiSimEnv
