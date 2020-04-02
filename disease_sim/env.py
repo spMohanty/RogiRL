@@ -59,37 +59,8 @@ class DiseaseSimEnv(gym.Env):
         ))
 
         self._model = None
+        self.running_score = None
         self.np_random = np.random
-
-
-    def step(self, action):
-        assert self.action_space.contains(action), "Invalid action provided !"
-        action = [int(x) for x in action]
-        if self.debug:
-            print(action)
-        
-        action_type = action[0]
-        cell_x = action[1]
-        cell_y = action[2]
-
-        _observation = False
-        _reward = 0.0
-        _done = False
-        _info = {}
-        if action_type == ActionType.STEP.value:
-            self._model.tick()
-            _observation = self._model.get_observation()
-            reward = 0.0
-            _done = self._model.running            
-        elif action_type == ActionType.VACCINATE.value:
-            vaccination_success, response = self._model.vaccinate_cell(cell_x, cell_y)
-            _observation = self._model.get_observation()
-            _done = self._model.running
-
-        _done = self._model.running 
-        return _observation, _reward, _done, _info
-
-
 
     def reset(  self,
                 width=None, 
@@ -142,16 +113,79 @@ class DiseaseSimEnv(gym.Env):
             max_timesteps, 
             toric, seed = _simulator_instance_seed
         )
-
         # Tick model
         self._model.tick()
+
+        """
+        """
+        self.running_score = self.get_current_game_score()
         # return observation
         return self._model.get_observation()
 
+    def get_current_game_score(self):
+        """
+        Returns the current game score
+
+        The game score is currently represented as : 
+            (percentage of susceptibles left in the population)
+        """
+        return self._model.get_population_fraction_by_state(
+                AgentState.SUSCEPTIBLE
+            )
+
+    def get_current_game_metrics(self):
+        """
+        Returns a dictionary containing import game metrics
+        """
+        _d = {}
+        # current population fraction of different states
+        _d["population.susceptible"] = self._model.get_population_fraction_by_state(AgentState.SUSCEPTIBLE)
+        _d["population.exposed"] = self._model.get_population_fraction_by_state(AgentState.EXPOSED)
+        _d["population.infectious"] = self._model.get_population_fraction_by_state(AgentState.INFECTIOUS)
+        _d["population.symptomatic"] = self._model.get_population_fraction_by_state(AgentState.SYMPTOMATIC)
+        _d["population.vaccinated"] = self._model.get_population_fraction_by_state(AgentState.VACCINATED)
+        return _d
+
+    def step(self, action):
+        assert self.action_space.contains(action), "Invalid action provided !"
+        if self._model == None:
+            raise Exception("env.step() called before calling env.reset()")
+        
+        action = [int(x) for x in action]
+        if self.debug:
+            print(action)
+        
+        action_type = action[0]
+        cell_x = action[1]
+        cell_y = action[2]
+
+        _observation = False
+        _done = False
+        _info = {}
+        if action_type == ActionType.STEP.value:
+            self._model.tick()
+            _observation = self._model.get_observation()
+            _done = self._model.running            
+        elif action_type == ActionType.VACCINATE.value:
+            vaccination_success, response = self._model.vaccinate_cell(cell_x, cell_y)
+            _observation = self._model.get_observation()
+            _done = self._model.running
+
+        # Compute difference in game score
+        current_score = self.get_current_game_score()
+        _step_reward = current_score - self.running_score
+        self.running_score = self.get_current_game_score()
+
+        # Add custom game metrics to info key
+        game_metrics = self.get_current_game_metrics()
+        for _key in game_metrics.keys():
+            _info[_key] = game_metrics[_key]
+
+        _done = not self._model.running 
+        return _observation, _step_reward, _done, _info
 
     def seed(self, seed=None):
         self.np_random.seed(seed)
-
 
     def render(self, mode='human', close=False):
         """
@@ -165,15 +199,15 @@ class DiseaseSimEnv(gym.Env):
 if __name__ == "__main__":
 
     env = DiseaseSimEnv(
-            width=4, height=4,
-            n_agents=2,
+            width=50, height=50,
+            n_agents=1500,
             prob_agent_movement=0,
             debug=True
             )
     observation = env.reset()
-    for k in range(10):
+    for k in range(100):
         observation, reward, done, info = env.step(env.action_space.sample())
         print("Step : ", k)
-        print(observation.shape, observation.sum(axis=-1))
+        # print(observation.shape)
         print(reward, done)
     # print(observation.shape())
