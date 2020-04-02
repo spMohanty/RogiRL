@@ -19,7 +19,9 @@ class ActionType(Enum):
 
 class DiseaseSimEnv(gym.Env):
     metadata = {'render.modes': ['human']}
-    def __init__(   self, 
+    def __init__(self, config={}):
+        # Setup Config
+        self.default_config = dict(
                     width=50, 
                     height=50,
                     population_density=0.75,
@@ -31,24 +33,13 @@ class DiseaseSimEnv(gym.Env):
                     disease_planner="simple_seir",
                     max_timesteps=200,
                     toric=True,
-                    debug=True
-                    ):
-        self.width = width
-        self.height = height
-        self.population_density = population_density
-        self.n_vaccines = n_vaccines
+                    debug=True)
+        self.config = {}
+        self.config.update(self.default_config)
+        self.config.update(config)
 
-        self.initial_infection_fraction = initial_infection_fraction
-        self.initial_vaccination_fraction = initial_vaccination_fraction
-
-        self.prob_infection = prob_infection
-        self.prob_agent_movement = prob_agent_movement
-
-        self.disease_planner = disease_planner
-
-        self.max_timesteps = max_timesteps
-        self.toric = toric
-        self.debug = debug
+        self.width = self.config["width"]
+        self.height = self.config["height"]
 
         self.action_space = spaces.MultiDiscrete(
             [
@@ -62,35 +53,23 @@ class DiseaseSimEnv(gym.Env):
         self.running_score = None
         self.np_random = np.random
 
-    def reset(  self,
-                width=None, 
-                height=None,
-                population_density=None,
-                n_vaccines=None,
-                initial_infection_fraction=None,
-                initial_vaccination_fraction=None,
-                prob_infection=None,
-                prob_agent_movement=None,
-                disease_planner=None,
-                max_timesteps=None,
-                toric=None):
-
+    def reset(self):
         # Delete Model if already exists
         if self._model:
             del self._model
 
-        # Replace reset parameters with default parameters if they are not provided
-        if width == None: width = self.width
-        if height == None: height = self.height
-        if population_density == None: population_density = self.population_density
-        if n_vaccines == None: n_vaccines = self.n_vaccines
-        if initial_infection_fraction == None: initial_infection_fraction = self.initial_infection_fraction
-        if initial_vaccination_fraction == None: initial_vaccination_fraction = self.initial_vaccination_fraction
-        if prob_infection == None: prob_infection = self.prob_infection
-        if prob_agent_movement == None: prob_agent_movement = self.prob_agent_movement
-        if disease_planner == None: disease_planner = self.disease_planner
-        if max_timesteps == None: max_timesteps = self.max_timesteps
-        if toric == None: toric = self.toric
+        width = self.config['width']
+        height = self.config['height']
+        population_density = self.config['population_density']
+        n_vaccines = self.config['n_vaccines']
+        initial_infection_fraction = self.config['initial_infection_fraction']
+        initial_vaccination_fraction = self.config['initial_vaccination_fraction']
+        prob_infection = self.config['prob_infection']
+        prob_agent_movement = self.config['prob_agent_movement']
+        disease_planner = self.config['disease_planner']
+        max_timesteps = self.config['max_timesteps']
+        toric = self.config['toric']
+        debug = self.config['debug']
 
         """
         Seeding Strategy :
@@ -200,12 +179,13 @@ class DiseaseSimEnv(gym.Env):
 
 if __name__ == "__main__":
 
-    env = DiseaseSimEnv(
+    env_config = dict(
             width=50, height=50,
             population_density=0.75,
             prob_agent_movement=0,
             debug=True
-            )
+    )
+    env = DiseaseSimEnv(config=env_config)
     observation = env.reset()
     for k in range(100):
         observation, reward, done, info = env.step(env.action_space.sample())
