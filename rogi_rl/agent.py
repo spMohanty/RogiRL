@@ -1,8 +1,5 @@
 from mesa import Agent
-try:
-    from .agent_state import AgentState
-except ImportError:
-    from agent_state import AgentState
+from rogi_rl.agent_state import AgentState
 
 class DiseaseSimAgent(Agent):  # noqa
     """

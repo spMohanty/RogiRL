@@ -5,19 +5,16 @@ from gym.utils import seeding
 from enum import Enum
 import numpy as np
 
-try:
-    from .agent_state import AgentState
-    from .model import DiseaseSimModel
-except ImportError:
-    from agent_state import AgentState
-    from model import DiseaseSimModel
+
+from rogi_rl.agent_state import AgentState
+from rogi_rl.model import DiseaseSimModel
 
 
 class ActionType(Enum):
     STEP = 0
     VACCINATE = 1
 
-class DiseaseSimEnv(gym.Env):
+class RogiSimEnv(gym.Env):
     metadata = {'render.modes': ['human']}
     def __init__(self, config={}):
         # Setup Config
@@ -44,9 +41,9 @@ class DiseaseSimEnv(gym.Env):
                     debug=True)
         self.config = {}
         self.config.update(self.default_config)
-        self.config.update(config)
+        self.config.update(self.config)
         
-        self.debug = config["debug"]
+        self.debug = self.config["debug"]
 
         self.width = self.config["width"]
         self.height = self.config["height"]
@@ -55,7 +52,7 @@ class DiseaseSimEnv(gym.Env):
             [
                 len(ActionType), self.width, self.height
             ])
-        self.observation_space = spaces.Box(low=0, high=1, shape=(
+        self.observation_space = spaces.Box(low=np.float32(0), high=np.float32(1), shape=(
             self.width, self.height, len(AgentState)
         ))
 
@@ -209,7 +206,7 @@ if __name__ == "__main__":
                     early_stopping_patience=14,
                     toric=True,
                     debug=True)
-    env = DiseaseSimEnv(config=env_config)
+    env = RogiSimEnv(config=env_config)
     observation = env.reset()
     done = False
     k = 0

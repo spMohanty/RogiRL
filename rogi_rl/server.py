@@ -2,13 +2,9 @@
 Configure visualization elements and instantiate a server
 """
 
-try:
-    from disease_sim.model import DiseaseSimModel, DiseaseSimAgent  # noqa
-    from disease_sim.colors import ColorMap
-    from disease_sim.agent_state import AgentState
-except ImportError:
-    from model import DiseaseSimModel, DiseaseSimAgent  # noqa
-    from agent_state import AgentState
+from rogi_rl.model import DiseaseSimModel, DiseaseSimAgent  # noqa
+from rogi_rl.colors import ColorMap
+from rogi_rl.agent_state import AgentState
 
 from mesa.visualization.ModularVisualization import ModularServer
 from mesa.visualization.modules import CanvasGrid, ChartModule
@@ -65,32 +61,17 @@ chart_element = ChartModule([
                                     "Color": "rgb{}".format(COLOR_MAP.get_color(AgentState.VACCINATED))
                                 }
                             ])
-
-model_kwargs = {
-                    "n_agents": 1000,
-                    "width": grid_width,
-                    "height": grid_height,
-                }
-
-"""
-                    width=50, 
-                    height=50,
-                    n_agents=1000,
-                    n_vaccines=100,
-                    initial_infection_fraction=0.5,
-                    initial_vaccination_fraction=0.05,
-                    prob_infection=0.2,
-                    prob_agent_movement=0.0,
-                    disease_planner="simple_seir",
-                    max_timesteps=200,
-                    toric=True,
-                    seed = None
-"""
 model_params = {
     "width" : 50,
     "height" : 50,
-    "n_agents" : UserSettableParameter('number', 'No. of Agents', value=500),
-    "n_vaccines" : UserSettableParameter('number', 'Vaccine Budget', value=100),
+    "population_density" : UserSettableParameter(
+                'slider', 'Population Density', value=0.1,
+                min_value=0.01, max_value=0.99, step=0.01
+                ),
+    "vaccine_density" : UserSettableParameter(
+                'slider', 'Vaccine Density', value=0.0,
+                min_value=0.0, max_value=0.99, step=0.01
+                ),
     "initial_infection_fraction" : \
         UserSettableParameter(
                 'slider', 'Initial Infection Fraction', value=0.1,
@@ -112,9 +93,10 @@ model_params = {
                 min_value=0.00, max_value=1.0, step=0.01
                 ), 
     "max_timesteps" : UserSettableParameter('number', 'Max. Timesteps', value=200),
+    "early_stopping_patience" : UserSettableParameter('number', 'Early Stopping Patience', value=14),
     "toric" : UserSettableParameter('checkbox', 'Toric Grid', value=True),
     "seed" : UserSettableParameter('number', 'Seed', value=420),
 }
 
 server = ModularServer(DiseaseSimModel, [canvas_element, chart_element],  # noqa
-                       "Disease Simulator", model_params)
+                       "Rogi Simulator", model_params)

@@ -1,3 +1,2 @@
-from disease_sim.server import server  # noqa
-
+from rogi_rl.server import server  # noqa
 server.launch()

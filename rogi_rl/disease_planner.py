@@ -1,10 +1,6 @@
-try:
-    from .agent_event import AgentEvent
-    from .agent_state import AgentState
-except ImportError:
-    from agent_event import AgentEvent
-    from agent_state import AgentState
 
+from rogi_rl.agent_event import AgentEvent
+from rogi_rl.agent_state import AgentState
 
 
 class DiseasePlannerBase:

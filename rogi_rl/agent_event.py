@@ -1,9 +1,6 @@
 
-try:
-    from .agent_state import AgentState
-except ImportError:
-    from agent_state import AgentState
 
+from rogi_rl.agent_state import AgentState
 import time
 
 class AgentEvent:

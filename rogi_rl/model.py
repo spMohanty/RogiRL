@@ -5,20 +5,12 @@ from mesa.datacollection import DataCollector
 
 import numpy as np
 
-try:
-    from .agent import DiseaseSimAgent
-    from .visualization import CustomTextGrid
-    from .disease_planner import SEIRDiseasePlanner
-    from .scheduler import CustomScheduler
-    from .agent_state import AgentState
-    from .vaccination_response import VaccinationResponse
-except ImportError:
-    from agent import DiseaseSimAgent
-    from visualization import CustomTextGrid
-    from disease_planner import SEIRDiseasePlanner
-    from scheduler import CustomScheduler
-    from agent_state import AgentState
-    from vaccination_response import VaccinationResponse
+from rogi_rl.agent import DiseaseSimAgent
+from rogi_rl.visualization import CustomTextGrid
+from rogi_rl.disease_planner import SEIRDiseasePlanner
+from rogi_rl.scheduler import CustomScheduler
+from rogi_rl.agent_state import AgentState
+from rogi_rl.vaccination_response import VaccinationResponse
     
 
 
