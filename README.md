@@ -19,7 +19,7 @@ pip install -U git+https://github.com/spMohanty/rogi_rl.git
 rogi-rl-demo
 ```
 
-and if everything went well, ideally you should see something along the lines of : https://i.imgur.com/AKAi0yQ.png
+and if everything went well, ideally you should see something along the lines of ![this](https://i.imgur.com/AKAi0yQ.png).
 
 ## Usage
 
