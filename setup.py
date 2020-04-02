@@ -4,7 +4,8 @@
 
 from setuptools import setup, find_packages
 
-with open('README.rst') as readme_file:
+## TODO - convert md to RST before submitting to PyPI
+with open('README.md') as readme_file:
     readme = readme_file.read()
 
 with open('HISTORY.rst') as history_file:
@@ -39,7 +40,7 @@ setup(
     description="Reinforcement Learning on Disease Transmission",
     entry_points={
         'console_scripts': [
-            'rogi_rl=rogi_rl.cli:main',
+            'rogi-rl-demo=rogi_rl.cli:demo',
         ],
     },
     install_requires=requirements,

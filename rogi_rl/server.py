@@ -89,7 +89,7 @@ model_params = {
                 ),
     "prob_agent_movement" : \
         UserSettableParameter(
-                'slider', 'Movement Probability', value=0.0,
+                'slider', 'Movement Probability', value=0.1,
                 min_value=0.00, max_value=1.0, step=0.01
                 ), 
     "max_timesteps" : UserSettableParameter('number', 'Max. Timesteps', value=200),

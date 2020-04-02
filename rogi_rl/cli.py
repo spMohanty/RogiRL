@@ -3,14 +3,14 @@ import sys
 import click
 
 
-@click.command()
-def main(args=None):
-    """Console script for rogi_rl."""
-    click.echo("Replace this message by putting your code into "
-               "rogi_rl.cli.main")
-    click.echo("See click documentation at https://click.palletsprojects.com/")
-    return 0
 
+@click.command()
+def demo(args=None):
+    """
+    Demo script to test installation
+    """
+    from rogi_rl.server import server  # noqa
+    server.launch()
 
 if __name__ == "__main__":
     sys.exit(main())  # pragma: no cover
