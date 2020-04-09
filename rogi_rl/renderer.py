@@ -43,13 +43,14 @@ class Renderer:
         self.MOUSE_HIGHLIGHTER_WIDTH = 3
 
         # GRID_PROPERTIES
-        self.GRID_BASE_X = self.MARGIN + self.CONTROL_PANEL_WIDTH + 2 * self.MARGIN
+        self.GRID_BASE_X = self.MARGIN + self.CONTROL_PANEL_WIDTH \
+            + 2 * self.MARGIN
         self.GRID_BASE_Y = self.MARGIN + self.TOP_PANEL_HEIGHT
 
         self.GRID_MAX_X = self.GRID_BASE_X + \
-                          (self.CELL_WIDTH) * self.get_grid_width()
+            (self.CELL_WIDTH) * self.get_grid_width()
         self.GRID_MAX_Y = self.GRID_BASE_Y + \
-                          (self.CELL_HEIGHT) * self.get_grid_height()
+            (self.CELL_HEIGHT) * self.get_grid_height()
 
         self.WIDTH = self.GRID_MAX_X + self.MARGIN
         self.HEIGHT = self.GRID_MAX_Y + self.MARGIN
@@ -94,8 +95,9 @@ class Renderer:
 
     def draw_stats(self):
         top_x = self.MARGIN
-        top_y = self.GRID_MAX_Y - (self.GRID_BASE_Y + self.MARGIN + self.AGENT_STATUS_FONT_SIZE
-                                   + 2 + self.AGENT_STATUS_LINE_SPACE)
+        top_y = self.GRID_MAX_Y - \
+            (self.GRID_BASE_Y + self.MARGIN + self.AGENT_STATUS_FONT_SIZE
+                + 2 + self.AGENT_STATUS_LINE_SPACE)
         ################################################################
         ################################################################
         dict_texts = {}
@@ -103,10 +105,15 @@ class Renderer:
         # Simulation Statistics Header
         _text_string = "Simulation Statistics"
 
-        dict_texts[_text_string] = pyglet.text.Label(_text_string,
-                          font_size=int(self.AGENT_STATUS_FONT_SIZE + 2),
-                          x=top_x, y=top_y,
-                          color=(*self.COLOR_MAP.get_color("AGENT_STATE_TEXT_COLOR"), 255))
+        _state_text_color = self.COLOR_MAP.get_color("AGENT_STATE_TEXT_COLOR")
+
+        dict_texts[_text_string] = pyglet.text.Label(
+                                    _text_string,
+                                    font_size=int(
+                                                self.AGENT_STATUS_FONT_SIZE
+                                                + 2),
+                                    x=top_x, y=top_y,
+                                    color=(*_state_text_color, 255))
 
         top_y -= self.AGENT_STATUS_LINE_SPACE + self.AGENT_STATUS_FONT_SIZE
         ################################################################
@@ -119,7 +126,7 @@ class Renderer:
         rect_width = self.CONTROL_PANEL_WIDTH
         rect_height = 2
 
-        self.draw_standard_rect(self.COLOR_MAP.get_color("AGENT_STATE_TEXT_COLOR"), (
+        self.draw_standard_rect(_state_text_color, (
             rect_base_x, rect_base_x + rect_width,
             rect_base_y + rect_height, rect_base_y
         ))
@@ -135,11 +142,12 @@ class Renderer:
             _text_string += " "
             _text_string += _state.name
 
-            dict_texts[_text_string] = pyglet.text.Label(_text_string,
-                                                           font_size=int(self.AGENT_STATUS_FONT_SIZE),
-                                                           x=top_x, y=top_y,
-                                                           color=(
-                                                               *self.COLOR_MAP.get_color(_state), 255))
+            _font_size = int(self.AGENT_STATUS_FONT_SIZE)
+            dict_texts[_text_string] = \
+                pyglet.text.Label(_text_string, font_size=_font_size,
+                                  x=top_x, y=top_y,
+                                  color=(
+                                      *self.COLOR_MAP.get_color(_state), 255))
 
             top_y -= self.AGENT_STATUS_LINE_SPACE + self.AGENT_STATUS_FONT_SIZE
         ################################################################
@@ -152,22 +160,22 @@ class Renderer:
         rect_width = self.CONTROL_PANEL_WIDTH
         rect_height = 2
 
-        self.draw_standard_rect(self.COLOR_MAP.get_color("AGENT_STATE_TEXT_COLOR"), (
-            rect_base_x, rect_base_x + rect_width,
-            rect_base_y + rect_height, rect_base_y
-        ))
+        self.draw_standard_rect(
+            self.COLOR_MAP.get_color("AGENT_STATE_TEXT_COLOR"), (
+                rect_base_x, rect_base_x + rect_width,
+                rect_base_y + rect_height, rect_base_y))
 
         top_y -= 2 * rect_height + self.AGENT_STATUS_LINE_SPACE
         ################################################################
         ################################################################
         # Simulation Progress Header
         _text_string = "Progress"
-
+        _font_size = int(self.AGENT_STATUS_FONT_SIZE + 2)
+        _color = (*_state_text_color, 255)
         dict_texts[_text_string] = pyglet.text.Label(_text_string,
-                                                     font_size=int(self.AGENT_STATUS_FONT_SIZE + 2),
+                                                     font_size=_font_size,
                                                      x=top_x, y=top_y,
-                                                     color=(
-                                                         *self.COLOR_MAP.get_color("AGENT_STATE_TEXT_COLOR"), 255))
+                                                     color=_color)
 
         top_y -= self.AGENT_STATUS_LINE_SPACE + self.AGENT_STATUS_FONT_SIZE
         ################################################################
@@ -180,7 +188,8 @@ class Renderer:
         rect_width = self.CONTROL_PANEL_WIDTH
         rect_height = 2
 
-        self.draw_standard_rect(self.COLOR_MAP.get_color("AGENT_STATE_TEXT_COLOR"), (
+        _state_text_color = self.COLOR_MAP.get_color("AGENT_STATE_TEXT_COLOR")
+        self.draw_standard_rect(_state_text_color, (
             rect_base_x, rect_base_x + rect_width,
             rect_base_y + rect_height, rect_base_y
         ))
@@ -191,24 +200,29 @@ class Renderer:
             _text_string += " "
             _text_string += _state
 
+            _font_size = int(self.AGENT_STATUS_FONT_SIZE)
+            _color = (*_state_text_color, 255)
+
             dict_texts[_text_string] = pyglet.text.Label(_text_string,
-                                                         font_size=int(self.AGENT_STATUS_FONT_SIZE),
+                                                         font_size=_font_size,
                                                          x=top_x, y=top_y,
-                                                         color=(
-                                                             *self.COLOR_MAP.get_color("AGENT_STATE_TEXT_COLOR"), 255))
+                                                         color=_color)
 
             top_y -= self.AGENT_STATUS_LINE_SPACE + self.AGENT_STATUS_FONT_SIZE
 
         _text_string = "Step Reward"
         _text_string += ":"
         _text_string += str(self.stats['SCORE'])
-        dict_texts[_text_string] = pyglet.text.Label(_text_string, font_size=int(self.AGENT_STATUS_FONT_SIZE+2),
-                                                 x=self.MARGIN,
-                                                 y=self.HEIGHT - self.MARGIN - self.AGENT_STATUS_FONT_SIZE,
-                                                 color=(*self.COLORS.RED, 255))
+        _font_size = int(self.AGENT_STATUS_FONT_SIZE+2)
+        _x = self.MARGIN
+        _y = self.HEIGHT - self.MARGIN - self.AGENT_STATUS_FONT_SIZE
+        dict_texts[_text_string] = pyglet.text.Label(
+                                    _text_string, font_size=_font_size,
+                                    x=_x,
+                                    y=_y,
+                                    color=(*self.COLORS.RED, 255))
 
         self.stats["TEXT_STRINGS"] = dict_texts
-        # print(self.stats)
 
     def update_stats(self, key, value):
         if type(value) != str:
@@ -272,8 +286,12 @@ class Renderer:
     def draw_standard_rect(self, color, rect_dims):
         rect_base_x, rect_base_y, rect_width, rect_height = rect_dims
         rectangle = rendering.FilledPolygon(
-            [(rect_base_x, rect_height), (rect_base_x, rect_width), (rect_base_y, rect_width),
-             (rect_base_y, rect_height)])
+            [
+                (rect_base_x, rect_height),
+                (rect_base_x, rect_width),
+                (rect_base_y, rect_width),
+                (rect_base_y, rect_height)
+            ])
         rectangle.set_color(*self.convert_gym_color(color))
         self.screen.add_geom(rectangle)
 
