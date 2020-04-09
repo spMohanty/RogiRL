@@ -1,10 +1,12 @@
 from mesa.visualization.TextVisualization import TextGrid
 
+
 def _default_converter(agent):
-    if agent == None:
+    if agent is None:
         return "-\t"
     else:
         return "*\t"
+
 
 class CustomTextGrid(TextGrid):
     grid = None
