@@ -7,12 +7,13 @@ class DiseasePlannerBase:
     """
     This class plans the schedule of different state transitions for a disease
     """
+
     def __init__(self, random=False):
         pass
 
     def get_disease_plan(self, base_timestep=0):
         """
-            Plans out the schedule of the state transitions for a 
+            Plans out the schedule of the state transitions for a
             particular agent using a particular disease model.
 
             It returns a list of AgentEvent objects which have to be
@@ -20,19 +21,21 @@ class DiseasePlannerBase:
         """
         return []
 
+
 class SEIRDiseasePlanner(DiseasePlannerBase):
     """
     This class plans the schedule of different state transitions for a disease
     """
-    def __init__(   self,
-                    latent_period_mu = 2 * 4,
-                    latent_period_sigma = 1 * 4,
-                    incubation_period_mu = 5 * 4,
-                    incubation_period_sigma = 3 * 4,
-                    recovery_period_mu = 14 * 4,
-                    recovery_period_sigma = 1 * 4,
-                    random = False
-                ):
+
+    def __init__(self,
+                 latent_period_mu=2 * 4,
+                 latent_period_sigma=1 * 4,
+                 incubation_period_mu=5 * 4,
+                 incubation_period_sigma=3 * 4,
+                 recovery_period_mu=14 * 4,
+                 recovery_period_sigma=1 * 4,
+                 random=False
+                 ):
 
         self.latent_period_mu = latent_period_mu
         self.latent_period_sigma = latent_period_sigma
@@ -48,7 +51,7 @@ class SEIRDiseasePlanner(DiseasePlannerBase):
 
     def get_disease_plan(self, base_timestep=0):
         """
-            Plans out the schedule of the state transitions for a 
+            Plans out the schedule of the state transitions for a
             particular agent using a particular disease model.
 
             It returns a list of AgentEvent objects which have to be
@@ -60,50 +63,53 @@ class SEIRDiseasePlanner(DiseasePlannerBase):
         #############################################
         #############################################
         # Compute Latent Period
-        # - Conditions : 
+        # - Conditions :
         #  - Latent Period has to be >= 0.
         #############################################
         #############################################
         latent_period = -1
         while True:
-            latent_period = round(self.random.normalvariate(self.latent_period_mu, self.latent_period_sigma))
-            if latent_period >= 0 :
+            latent_period = round(self.random.normalvariate(
+                self.latent_period_mu, self.latent_period_sigma))
+            if latent_period >= 0:
                 break
             print(latent_period)
-        
+
         #############################################
         #############################################
         # Compute Incubation Period
         #
-        # - Conditions : 
-        #  - Incubation Period has to be greater than 
+        # - Conditions :
+        #  - Incubation Period has to be greater than
         #    the latent period.
         #############################################
         #############################################
         incubation_period = -1
         while True:
-            incubation_period = round(self.random.normalvariate(self.incubation_period_mu, self.incubation_period_sigma))
+            incubation_period = round(self.random.normalvariate(
+                self.incubation_period_mu, self.incubation_period_sigma))
             if incubation_period > latent_period:
                 break
-        
+
         #############################################
         #############################################
         # Compute Recovery Period
         #
-        # - Conditions : 
-        #  - Recovery Period has to be greater than 
+        # - Conditions :
+        #  - Recovery Period has to be greater than
         #    the Incubation period.
         #############################################
         #############################################
         recovery_period = -1
         while True:
-            recovery_period = round(self.random.normalvariate(self.recovery_period_mu, self.recovery_period_sigma))
+            recovery_period = round(self.random.normalvariate(
+                self.recovery_period_mu, self.recovery_period_sigma))
             if recovery_period > incubation_period:
                 break
 
         #############################################
         #############################################
-        # 
+        #
         # Build AgentEvents
         #
         #############################################
@@ -153,12 +159,13 @@ class SimpleSEIRDiseasePlanner(SEIRDiseasePlanner):
     """
     This class plans the schedule of different state transitions for a disease
     """
-    def __init__(   self,
-                    latent_period = 2 * 1,
-                    incubation_period = 5 * 1,
-                    recovery_period = 14 * 1,
-                    random = False
-                ):
+
+    def __init__(self,
+                 latent_period=2 * 1,
+                 incubation_period=5 * 1,
+                 recovery_period=14 * 1,
+                 random=False
+                 ):
         self.latent_period_mu = latent_period
         self.latent_period_sigma = 0
 
