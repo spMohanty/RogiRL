@@ -8,6 +8,7 @@ import numpy as np
 
 from rogi_rl.agent_state import AgentState
 from rogi_rl.model import DiseaseSimModel
+from rogi_rl.vaccination_response import VaccinationResponse
 
 class ActionType(Enum):
     STEP = 0
@@ -37,7 +38,7 @@ class RogiSimEnv(gym.Env):
                     max_simulation_timesteps=200,
                     early_stopping_patience=14,
                     toric=True,
-                    debug=True)
+                    debug=False)
         self.config = {}
         self.config.update(self.default_config)
         self.config.update(self.config)
@@ -109,6 +110,14 @@ class RogiSimEnv(gym.Env):
             max_simulation_timesteps, early_stopping_patience,
             toric, seed = _simulator_instance_seed
         )
+
+        # Set the max timesteps of an env as the sum of :
+        # - max_simulation_timesteps
+        # - Number of Vaccines available
+
+        self._max_episode_steps = self.config['max_simulation_timesteps'] + \
+            self._model.n_vaccines
+
         # Tick model
         self._model.tick()
 
@@ -228,6 +237,13 @@ class RogiSimEnv(gym.Env):
             vaccination_success, response = self._model.vaccinate_cell(cell_x, cell_y)
             _observation = self._model.get_observation()
 
+            # Force Run simulation to completion if
+            # run out of vaccines
+            if response == VaccinationResponse.AGENT_VACCINES_EXHAUSTED:
+                while self._model.is_running():
+                    self._model.tick()
+                    _observation = self._model.get_observation()
+
         # Compute difference in game score
         current_score = self.get_current_game_score()
         _step_reward = current_score - self.running_score
@@ -294,5 +310,5 @@ if __name__ == "__main__":
         observation, reward, done, info = env.step(env.action_space.sample())
         k += 1
         # print(observation.shape)
-        print(k, reward, done)
+        # print(k, reward, done)
     # print(observation.shape())

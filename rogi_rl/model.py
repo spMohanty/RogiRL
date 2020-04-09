@@ -270,7 +270,6 @@ class DiseaseSimModel(Model):
             or
             - the fraction of susceptible population has not changed since the last N timesteps
         """
-        print(self.schedule.steps, self.max_timesteps)
         if self.schedule.steps > self.max_timesteps - 1:
             self.running = False
             return
