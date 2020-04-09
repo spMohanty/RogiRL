@@ -45,7 +45,7 @@ class RogiSimEnv(gym.Env):
                     debug=False)
         self.config = {}
         self.config.update(self.default_config)
-        self.config.update(self.config)
+        self.config.update(config)
 
         self.debug = self.config["debug"]
 
@@ -281,6 +281,9 @@ class RogiSimEnv(gym.Env):
         environment's behavior to a window which should be
         readable to the human eye if mode is set to 'human'.
         """
+        if not self.use_renderer:
+            return
+
         if not self.renderer:
             self.initialize_renderer()
 
@@ -317,6 +320,7 @@ if __name__ == "__main__":
                     toric=True,
                     debug=True)
     env = RogiSimEnv(config=env_config)
+    print("USE RENDERER ?", env.use_renderer)
     observation = env.reset()
     done = False
     k = 0

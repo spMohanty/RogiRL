@@ -1,58 +1,60 @@
-from mesa import Agent, Model
-from mesa.time import RandomActivation
+from mesa import Model
 from mesa.space import SingleGrid
 from mesa.datacollection import DataCollector
 
 import numpy as np
 
 from rogi_rl.agent import DiseaseSimAgent
-from rogi_rl.visualization import CustomTextGrid
 from rogi_rl.disease_planner import SEIRDiseasePlanner
 from rogi_rl.scheduler import CustomScheduler
 from rogi_rl.agent_state import AgentState
 from rogi_rl.vaccination_response import VaccinationResponse
-    
 
 
 class DiseaseSimModel(Model):
     """
-    The model class holds the model-level attributes, manages the agents, and generally handles
+    The model class holds the model-level attributes, manages the agents,
+    and generally handles
     the global level of our model.
 
-    There is only one model-level parameter: how many agents the model contains. When a new model
+    There is only one model-level parameter: how many agents
+    the model contains. When a new model
     is started, we want it to populate itself with the given number of agents.
 
-    The scheduler is a special model component which controls the order in which agents are activated.
+    The scheduler is a special model component which controls the order
+    in which agents are activated.
     """
 
-    def __init__(   self, 
-                    width=50, 
-                    height=50,
-                    population_density=0.75,
-                    vaccine_density=0,
-                    initial_infection_fraction=0.1,
-                    initial_vaccination_fraction=0.00,
-                    prob_infection=0.2,
-                    prob_agent_movement=0.0,
-                    disease_planner_config={
-                        "latent_period_mu" :  2 * 4,
-                        "latent_period_sigma" :  0,
-                        "incubation_period_mu" :  5 * 4,
-                        "incubation_period_sigma" :  0,
-                        "recovery_period_mu" :  14 * 4,
-                        "recovery_period_sigma" :  0,
-                    },                    
-                    max_timesteps=200,
-                    early_stopping_patience = 14,
-                    toric=True,
-                    seed = None
-                    ):
+    def __init__(
+        self,
+        width=50,
+        height=50,
+        population_density=0.75,
+        vaccine_density=0,
+        initial_infection_fraction=0.1,
+        initial_vaccination_fraction=0.00,
+        prob_infection=0.2,
+        prob_agent_movement=0.0,
+        disease_planner_config={
+            "latent_period_mu":  2 * 4,
+            "latent_period_sigma":  0,
+            "incubation_period_mu":  5 * 4,
+            "incubation_period_sigma":  0,
+            "recovery_period_mu":  14 * 4,
+            "recovery_period_sigma":  0,
+        },
+        max_timesteps=200,
+        early_stopping_patience=14,
+        toric=True,
+        seed=None
+    ):
         super().__init__()
 
         self.width = width
         self.height = height
-        self.population_density = population_density # fraction of the whole grid that is initiailized with agents 
-        self.vaccine_density = vaccine_density # 
+        # fraction of the whole grid that is initiailized with agents
+        self.population_density = population_density
+        self.vaccine_density = vaccine_density
 
         self.n_agents = False
         self.n_vaccines = False
@@ -62,13 +64,13 @@ class DiseaseSimModel(Model):
 
         self.prob_infection = prob_infection
         self.prob_agent_movement = prob_agent_movement
-        
+
         self.disease_planner_config = disease_planner_config
 
         self.max_timesteps = max_timesteps
         self.early_stopping_patience = early_stopping_patience
         self.toric = toric
-        self.seed  = seed 
+        self.seed = seed
 
         self.initialize_observation()
         self.initialize_disease_planner()
@@ -77,35 +79,36 @@ class DiseaseSimModel(Model):
         self.initialize_agents(
             infection_fraction=self.initial_infection_fraction,
             vaccination_fraction=self.initial_vaccination_fraction
-            )
+        )
         self.initialize_datacollector()
         self.running = True
         self.datacollector.collect(self)
 
-    ##########################################################################################
-    ##########################################################################################
+    ###########################################################################
+    ###########################################################################
     # Setup Initialization Helper Functions
-    ##########################################################################################
+    ###########################################################################
     def initialize_observation(self):
         """
         Observation is a nd-array of shape (width, height, num_states)
-        where each AgentState will be marked in a separate challenge for each of the cells
+        where each AgentState will be marked in a separate challenge
+        for each of the cells
         """
         self.observation = np.zeros((self.width, self.height, len(AgentState)))
 
     def initialize_disease_planner(self):
         """
-        Initializes a disease planner that the Agents can use to "schedule" infection progressions
+        Initializes a disease planner that the Agents can use to "schedule"
+        infection progressions
         """
         self.disease_planner = SEIRDiseasePlanner(
-                        latent_period_mu = self.disease_planner_config["latent_period_mu"],
-                        latent_period_sigma = self.disease_planner_config["latent_period_sigma"],
-                        incubation_period_mu = self.disease_planner_config["incubation_period_mu"],
-                        incubation_period_sigma = self.disease_planner_config["incubation_period_sigma"],
-                        recovery_period_mu = self.disease_planner_config["recovery_period_mu"],
-                        recovery_period_sigma = self.disease_planner_config["recovery_period_sigma"]
+            latent_period_mu=self.disease_planner_config["latent_period_mu"],
+            latent_period_sigma=self.disease_planner_config["latent_period_sigma"],  # noqa
+            incubation_period_mu=self.disease_planner_config["incubation_period_mu"],  # noqa
+            incubation_period_sigma=self.disease_planner_config["incubation_period_sigma"],  # noqa
+            recovery_period_mu=self.disease_planner_config["recovery_period_mu"],  # noqa
+            recovery_period_sigma=self.disease_planner_config["recovery_period_sigma"]  # noqa
         )
-
 
     def initialize_scheduler(self):
         """
@@ -117,7 +120,8 @@ class DiseaseSimModel(Model):
         """
         Initializes the initial Grid
         """
-        self.grid = SingleGrid(width=self.width, height=self.height, torus=self.toric)
+        self.grid = SingleGrid(
+            width=self.width, height=self.height, torus=self.toric)
 
     def initialize_agents(self, infection_fraction, vaccination_fraction):
         """
@@ -125,26 +129,28 @@ class DiseaseSimModel(Model):
         """
         assert 0 < self.population_density <= 1, \
             "population_density should be between (0, 1]"
-        
+
         # Assess the actual population
         self.n_agents = int(self.width * self.height * self.population_density)
         # Assess the available number of vaccines
         self.n_vaccines = int(self.n_agents * self.vaccine_density)
-        
 
-        # Assess the number of agents that have to be infected (the seed infection)
+        # Assess the number of agents that
+        # have to be infected (the seed infection)
         number_of_agents_to_infect = int(infection_fraction * self.n_agents)
-        number_of_agents_to_vaccinate = int(vaccination_fraction * self.n_agents)
+        number_of_agents_to_vaccinate = int(
+            vaccination_fraction * self.n_agents)
 
-        # Assess the maximum number of vaccines available in the whole simulation
+        # Assess the maximum number of vaccines
+        # available in the whole simulation
         self.max_vaccines = self.n_vaccines + number_of_agents_to_vaccinate
 
         for i in range(self.n_agents):
             agent = DiseaseSimAgent(
-                            unique_id = i, 
-                            model = self, 
-                            prob_agent_movement = self.prob_agent_movement
-                        )
+                unique_id=i,
+                model=self,
+                prob_agent_movement=self.prob_agent_movement
+            )
             self.schedule.add(agent)
             self.grid.position_agent(agent, x="random", y="random")
 
@@ -154,11 +160,16 @@ class DiseaseSimModel(Model):
             self.observation[agent_x, agent_y, agent.state.value] = 1
 
             # Seed the infection in a fraction of the agents
-            if i < number_of_agents_to_infect:
+            infection_condition = i < number_of_agents_to_infect
+            if infection_condition:
                 agent.trigger_infection(prob_infection=1.0)
-            
+
             # Seed the vaccination in a fraction of the agents
-            if i >= number_of_agents_to_infect and i < (number_of_agents_to_infect + number_of_agents_to_vaccinate):
+            vaccination_condition = (
+                i >= number_of_agents_to_infect and
+                i < (number_of_agents_to_infect + number_of_agents_to_vaccinate))  # noqa
+
+            if vaccination_condition:
                 agent.set_state(AgentState.VACCINATED)
 
     def initialize_datacollector(self):
@@ -166,32 +177,32 @@ class DiseaseSimModel(Model):
         Setup the initial datacollector
         """
         self.datacollector = DataCollector(
-            model_reporters = {
-                    "Susceptible" : lambda m: m.get_population_fraction_by_state(AgentState.SUSCEPTIBLE),
-                    "Exposed" : lambda m: m.get_population_fraction_by_state(AgentState.EXPOSED),
-                    "Infectious" : lambda m: m.get_population_fraction_by_state(AgentState.INFECTIOUS),
-                    "Symptomatic" : lambda m: m.get_population_fraction_by_state(AgentState.SYMPTOMATIC),
-                    "Recovered" : lambda m: m.get_population_fraction_by_state(AgentState.RECOVERED),
-                    "Vaccinated" : lambda m: m.get_population_fraction_by_state(AgentState.VACCINATED)
-                }
+            model_reporters={
+                "Susceptible": lambda m: m.get_population_fraction_by_state(AgentState.SUSCEPTIBLE),  # noqa
+                "Exposed": lambda m: m.get_population_fraction_by_state(AgentState.EXPOSED),  # noqa
+                "Infectious": lambda m: m.get_population_fraction_by_state(AgentState.INFECTIOUS),  # noqa
+                "Symptomatic": lambda m: m.get_population_fraction_by_state(AgentState.SYMPTOMATIC),  # noqa
+                "Recovered": lambda m: m.get_population_fraction_by_state(AgentState.RECOVERED),  # noqa
+                "Vaccinated": lambda m: m.get_population_fraction_by_state(AgentState.VACCINATED)  # noqa
+            }
         )
 
-    ##########################################################################################
-    ##########################################################################################
+    ###########################################################################
+    ###########################################################################
     # State Aggregation
     #       - Functions for easy access/aggregation of simulation wide state
-    ##########################################################################################
+    ###########################################################################
 
     def get_observation(self):
         # assert self.observation.sum(axis=-1).max() <= 1.0
         # Assertion disabled for perf reasons
         return self.observation
 
-    ##########################################################################################
-    ##########################################################################################
+    ###########################################################################
+    ###########################################################################
     # Scheduler
     #       - Functions for easy access to scheduler
-    ##########################################################################################
+    ###########################################################################
 
     def get_scheduler(self):
         return self.schedule
@@ -202,11 +213,11 @@ class DiseaseSimModel(Model):
     def is_running(self):
         return self.running
 
-    ##########################################################################################
-    ##########################################################################################
+    ###########################################################################
+    ###########################################################################
     # Actions
     #        - Functions for actions that can be performed on the model
-    ##########################################################################################
+    ###########################################################################
 
     def step(self):
         """
@@ -222,9 +233,11 @@ class DiseaseSimModel(Model):
         Vaccinates an agent at cell_x, cell_y, if present
 
         Response with :
-        (is_vaccination_successful: boolean, vaccination_response: VaccinationResponse)
+        (is_vaccination_successful, vaccination_response)
+        of types
+        (boolean, VaccinationResponse)
         """
-        
+
         # Case 0 : No vaccines left
         if self.n_vaccines <= 0:
             return False, VaccinationResponse.AGENT_VACCINES_EXHAUSTED
@@ -243,23 +256,27 @@ class DiseaseSimModel(Model):
             # Case 3 : Agent is already exposed, and its a waste of vaccination
             return False, VaccinationResponse.AGENT_EXPOSED
         elif agent.state == AgentState.INFECTIOUS:
-            # Case 4 : Agent is already infectious, and its a waste of vaccination
+            # Case 4 : Agent is already infectious,
+            # and its a waste of vaccination
             return False, VaccinationResponse.AGENT_INFECTIOUS
         elif agent.state == AgentState.SYMPTOMATIC:
-            # Case 5 : Agent is already Symptomatic, and its a waste of vaccination
+            # Case 5 : Agent is already Symptomatic,
+            # and its a waste of vaccination
             return False, VaccinationResponse.AGENT_SYMPTOMATIC
         elif agent.state == AgentState.RECOVERED:
-            # Case 6 : Agent is already Recovered, and its a waste of vaccination
+            # Case 6 : Agent is already Recovered,
+            # and its a waste of vaccination
             return False, VaccinationResponse.AGENT_RECOVERED
         elif agent.state == AgentState.VACCINATED:
-            # Case 7 : Agent is already Vaccination, and its a waste of vaccination
+            # Case 7 : Agent is already Vaccination,
+            # and its a waste of vaccination
             return False, VaccinationResponse.AGENT_VACCINATED
         raise NotImplementedError()
 
-    ##########################################################################################
-    ##########################################################################################
+    ###########################################################################
+    ###########################################################################
     # Misc
-    ##########################################################################################
+    ###########################################################################
 
     def simulation_completion_checks(self):
         """
@@ -268,27 +285,30 @@ class DiseaseSimModel(Model):
             or
             - the fraction of susceptible population is <= 0
             or
-            - the fraction of susceptible population has not changed since the last N timesteps
+            - the fraction of susceptible population has not changed since the
+            last N timesteps
         """
         if self.schedule.steps > self.max_timesteps - 1:
             self.running = False
             return
-        
-        susceptible_population = self.get_population_fraction_by_state(AgentState.SUSCEPTIBLE)
+
+        susceptible_population = self.get_population_fraction_by_state(
+            AgentState.SUSCEPTIBLE)
         if susceptible_population <= 0:
             self.running = False
             return
-        
+
         if self.schedule.steps > self.early_stopping_patience:
             last_N_susceptible_population = \
-                self.datacollector.model_vars["Susceptible"][-1 * self.early_stopping_patience : ]
+                self.datacollector.model_vars["Susceptible"][-1 *
+                                                             self.early_stopping_patience:]  # noqa
             if len(set(last_N_susceptible_population)) == 1:
                 self.running = False
                 return
 
     def tick(self):
         """
-        a mirror function for the internal step function 
+        a mirror function for the internal step function
         to help avoid confusion in the RL codebases (with the RL step)
         """
         self.step()
@@ -298,45 +318,47 @@ class DiseaseSimModel(Model):
         Propagates infection during a single simulation step
         """
         valid_infectious_agents = []
-        valid_infectious_agents += self.schedule.get_agents_by_state(AgentState.INFECTIOUS)
-        valid_infectious_agents += self.schedule.get_agents_by_state(AgentState.SYMPTOMATIC)
+        valid_infectious_agents += self.schedule.get_agents_by_state(
+            AgentState.INFECTIOUS)
+        valid_infectious_agents += self.schedule.get_agents_by_state(
+            AgentState.SYMPTOMATIC)
 
         for _infectious_agent in valid_infectious_agents:
             target_candidates = self.grid.get_neighbors(
-                pos = _infectious_agent.pos,
-                moore = True, 
-                include_center = False,
-                radius = 1
+                pos=_infectious_agent.pos,
+                moore=True,
+                include_center=False,
+                radius=1
             )
             for _target_candidate in target_candidates:
                 if _target_candidate.state == AgentState.SUSCEPTIBLE:
-                    _target_candidate.trigger_infection(prob_infection=self.prob_infection)
+                    _target_candidate.trigger_infection(
+                        prob_infection=self.prob_infection)
 
 
 if __name__ == "__main__":
     model = DiseaseSimModel(
-                    width=50,
-                    height=50,
-                    population_density=0.99,
-                    vaccine_density=0.0,
-                    initial_infection_fraction=0.99,
-                    initial_vaccination_fraction=0.0,
-                    prob_infection=1.0,
-                    prob_agent_movement=0.0,
-                    disease_planner_config={
-                        "latent_period_mu" :  2 * 4,
-                        "latent_period_sigma" :  0,
-                        "incubation_period_mu" :  5 * 4,
-                        "incubation_period_sigma" :  0,
-                        "recovery_period_mu" :  14 * 4,
-                        "recovery_period_sigma" :  0,
-                    },                    
-                    max_timesteps=5,
-                    early_stopping_patience = 14,
-                    toric=True)
-    
+        width=50,
+        height=50,
+        population_density=0.99,
+        vaccine_density=0.0,
+        initial_infection_fraction=0.99,
+        initial_vaccination_fraction=0.0,
+        prob_infection=1.0,
+        prob_agent_movement=0.0,
+        disease_planner_config={
+            "latent_period_mu":  2 * 4,
+            "latent_period_sigma":  0,
+            "incubation_period_mu":  5 * 4,
+            "incubation_period_sigma":  0,
+            "recovery_period_mu":  14 * 4,
+            "recovery_period_sigma":  0,
+        },
+        max_timesteps=5,
+        early_stopping_patience=14,
+        toric=True)
+
     import time
-    import numpy as np
     per_step_times = []
     for k in range(100):
         _time = time.time()
@@ -352,13 +374,10 @@ if __name__ == "__main__":
 
         # print(per_step_times[-1])
         # print(model.datacollector.get_model_vars_dataframe())
-        # print("S", model.schedule.get_agent_count_by_state(AgentState.SUSCEPTIBLE))
-        # print("E", model.schedule.get_agent_count_by_state(AgentState.EXPOSED))
-        # print("I", model.schedule.get_agent_count_by_state(AgentState.INFECTIOUS))
-        # print("R", model.schedule.get_agent_count_by_state(AgentState.RECOVERED))
+        # print("S", model.schedule.get_agent_count_by_state(AgentState.SUSCEPTIBLE))  # noqa
+        # print("E", model.schedule.get_agent_count_by_state(AgentState.EXPOSED))  # noqa
+        # print("I", model.schedule.get_agent_count_by_state(AgentState.INFECTIOUS))  # noqa
+        # print("R", model.schedule.get_agent_count_by_state(AgentState.RECOVERED))  # noqa
         # print(viz.render())
     per_step_times = np.array(per_step_times)
-    print("Per Step Time : {} += {}", per_step_times.mean(), per_step_times.std())
-
-
-        
+    print("Per Step Time : {} += {}", per_step_times.mean(), per_step_times.std())  # noqa
