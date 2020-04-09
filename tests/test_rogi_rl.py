@@ -2,14 +2,9 @@
 
 """Tests for `rogi_rl` package."""
 
-
 import unittest
-from click.testing import CliRunner
-
-from rogi_rl import rogi_rl
-from rogi_rl import cli
-
 from rogi_rl import RogiSimEnv
+
 
 class TestRogiSimEnv(unittest.TestCase):
     """Tests for `rogi_rl` package."""
@@ -22,16 +17,13 @@ class TestRogiSimEnv(unittest.TestCase):
 
     def test_env_instantiation(self):
         """
-        Test that a newly instantiated env 
+        Test that a newly instantiated env
         returns a valid observation of the correct shape
         """
         config = {
-            "width" : 50,
-            "height" : 50
+            "width": 50,
+            "height": 50
         }
         env = RogiSimEnv(config)
         observation = env.reset()
         assert observation.shape == (50, 50, 6)
-
-
-
