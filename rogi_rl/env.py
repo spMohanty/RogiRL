@@ -34,7 +34,7 @@ class RogiSimEnv(gym.Env):
                         "recovery_period_mu" :  14 * 4,
                         "recovery_period_sigma" :  0,
                     },
-                    max_timesteps=200,
+                    max_simulation_timesteps=200,
                     early_stopping_patience=14,
                     toric=True,
                     debug=True)
@@ -83,7 +83,7 @@ class RogiSimEnv(gym.Env):
         prob_infection = self.config['prob_infection']
         prob_agent_movement = self.config['prob_agent_movement']
         disease_planner_config = self.config['disease_planner_config']
-        max_timesteps = self.config['max_timesteps']
+        max_simulation_timesteps = self.config['max_simulation_timesteps']
         early_stopping_patience=self.config['early_stopping_patience']
         toric = self.config['toric']
         debug = self.config['debug']
@@ -106,7 +106,7 @@ class RogiSimEnv(gym.Env):
             initial_infection_fraction, initial_vaccination_fraction,
             prob_infection, prob_agent_movement,
             disease_planner_config, 
-            max_timesteps, early_stopping_patience,
+            max_simulation_timesteps, early_stopping_patience,
             toric, seed = _simulator_instance_seed
         )
         # Tick model
@@ -282,7 +282,7 @@ if __name__ == "__main__":
                         "recovery_period_mu" :  14 * 4,
                         "recovery_period_sigma" :  0,
                     },
-                    max_timesteps=200,
+                    max_simulation_timesteps=200,
                     early_stopping_patience=14,
                     toric=True,
                     debug=True)
