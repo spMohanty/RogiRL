@@ -4,11 +4,21 @@ import click
 
 
 @click.command()
-def demo(args=None):
+@click.option('--width',
+              default=50,
+              help="Width of the Grid"
+              )
+@click.option('--height',
+              default=50,
+              help="Height of the Grid"
+              )
+def demo(width, height):
     """
     Demo script to test installation
     """
-    from rogi_rl.server import server  # noqa
+    from rogi_rl.server import build_server  # noqa
+
+    server = build_server(width, height)
     server.launch()
 
 

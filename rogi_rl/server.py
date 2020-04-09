@@ -29,94 +29,97 @@ def agent_potrayal(agent):
     return portrayal
 
 
-grid_width = 50
-grid_height = 50
+def build_server(grid_width=50, grid_height=50):
+    canvas_width = 500
+    canvas_height = 500
 
-canvas_width = 500
-canvas_height = 500
+    canvas_element = CanvasGrid(
+                        agent_potrayal, grid_width, grid_height,
+                        canvas_width, canvas_height)
+    chart_element = ChartModule([
+                                    {
+                                        "Label": "Susceptible",
+                                        "Color": "rgb{}".format(
+                                            COLOR_MAP.get_color(
+                                                AgentState.SUSCEPTIBLE))
+                                    },
+                                    {
+                                        "Label": "Exposed",
+                                        "Color": "rgb{}".format(
+                                            COLOR_MAP.get_color(
+                                                AgentState.EXPOSED))
+                                    },
+                                    {
+                                        "Label": "Infectious",
+                                        "Color": "rgb{}".format(
+                                            COLOR_MAP.get_color(
+                                                AgentState.INFECTIOUS))
+                                    },
+                                    {
+                                        "Label": "Symptomatic",
+                                        "Color": "rgb{}".format(
+                                            COLOR_MAP.get_color(
+                                                AgentState.SYMPTOMATIC))
+                                    },
+                                    {
+                                        "Label": "Recovered",
+                                        "Color": "rgb{}".format(
+                                            COLOR_MAP.get_color(
+                                                AgentState.RECOVERED))
+                                    },
+                                    {
+                                        "Label": "Vaccinated",
+                                        "Color": "rgb{}".format(
+                                            COLOR_MAP.get_color(
+                                                AgentState.VACCINATED))
+                                    }
+                                ])
+    model_params = {
+        "width": grid_width,
+        "height": grid_height,
+        "population_density": UserSettableParameter(
+                    'slider', 'Population Density', value=0.1,
+                    min_value=0.01, max_value=0.99, step=0.01
+                    ),
+        "vaccine_density": UserSettableParameter(
+                    'slider', 'Vaccine Density', value=0.0,
+                    min_value=0.0, max_value=0.99, step=0.01
+                    ),
+        "initial_infection_fraction":
+            UserSettableParameter(
+                    'slider', 'Initial Infection Fraction', value=0.1,
+                    min_value=0.01, max_value=0.99, step=0.01
+                    ),
+        "initial_vaccination_fraction":
+            UserSettableParameter(
+                    'slider', 'Initial Vaccination Fraction', value=0.05,
+                    min_value=0.01, max_value=0.99, step=0.01
+                    ),
+        "prob_infection":
+            UserSettableParameter(
+                    'slider', 'Infection Probability', value=0.2,
+                    min_value=0.01, max_value=1.0, step=0.01
+                    ),
+        "prob_agent_movement":
+            UserSettableParameter(
+                    'slider', 'Movement Probability', value=0.1,
+                    min_value=0.00, max_value=1.0, step=0.01
+                    ),
+        "max_timesteps": UserSettableParameter(
+                                                'number', 'Max. Timesteps',
+                                                value=200),
+        "early_stopping_patience": UserSettableParameter(
+                                                'number',
+                                                'Early Stopping Patience',
+                                                value=14),
+        "toric": UserSettableParameter('checkbox', 'Toric Grid', value=True),
+        "seed": UserSettableParameter('number', 'Seed', value=420),
+    }
 
-canvas_element = CanvasGrid(
-                    agent_potrayal, grid_width, grid_height,
-                    canvas_width, canvas_height)
-chart_element = ChartModule([
-                                {
-                                    "Label": "Susceptible",
-                                    "Color": "rgb{}".format(
-                                        COLOR_MAP.get_color(
-                                            AgentState.SUSCEPTIBLE))
-                                },
-                                {
-                                    "Label": "Exposed",
-                                    "Color": "rgb{}".format(
-                                        COLOR_MAP.get_color(
-                                            AgentState.EXPOSED))
-                                },
-                                {
-                                    "Label": "Infectious",
-                                    "Color": "rgb{}".format(
-                                        COLOR_MAP.get_color(
-                                            AgentState.INFECTIOUS))
-                                },
-                                {
-                                    "Label": "Symptomatic",
-                                    "Color": "rgb{}".format(
-                                        COLOR_MAP.get_color(
-                                            AgentState.SYMPTOMATIC))
-                                },
-                                {
-                                    "Label": "Recovered",
-                                    "Color": "rgb{}".format(
-                                        COLOR_MAP.get_color(
-                                            AgentState.RECOVERED))
-                                },
-                                {
-                                    "Label": "Vaccinated",
-                                    "Color": "rgb{}".format(
-                                        COLOR_MAP.get_color(
-                                            AgentState.VACCINATED))
-                                }
-                            ])
-model_params = {
-    "width": 50,
-    "height": 50,
-    "population_density": UserSettableParameter(
-                'slider', 'Population Density', value=0.1,
-                min_value=0.01, max_value=0.99, step=0.01
-                ),
-    "vaccine_density": UserSettableParameter(
-                'slider', 'Vaccine Density', value=0.0,
-                min_value=0.0, max_value=0.99, step=0.01
-                ),
-    "initial_infection_fraction":
-        UserSettableParameter(
-                'slider', 'Initial Infection Fraction', value=0.1,
-                min_value=0.01, max_value=0.99, step=0.01
-                ),
-    "initial_vaccination_fraction":
-        UserSettableParameter(
-                'slider', 'Initial Vaccination Fraction', value=0.05,
-                min_value=0.01, max_value=0.99, step=0.01
-                ),
-    "prob_infection":
-        UserSettableParameter(
-                'slider', 'Infection Probability', value=0.2,
-                min_value=0.01, max_value=1.0, step=0.01
-                ),
-    "prob_agent_movement":
-        UserSettableParameter(
-                'slider', 'Movement Probability', value=0.1,
-                min_value=0.00, max_value=1.0, step=0.01
-                ),
-    "max_timesteps": UserSettableParameter(
-                                            'number', 'Max. Timesteps',
-                                            value=200),
-    "early_stopping_patience": UserSettableParameter(
-                                            'number',
-                                            'Early Stopping Patience',
-                                            value=14),
-    "toric": UserSettableParameter('checkbox', 'Toric Grid', value=True),
-    "seed": UserSettableParameter('number', 'Seed', value=420),
-}
+    _server = ModularServer(DiseaseSimModel, [canvas_element, chart_element],  # noqa
+                        "Rogi Simulator", model_params)
 
-server = ModularServer(DiseaseSimModel, [canvas_element, chart_element],  # noqa
-                       "Rogi Simulator", model_params)
+    return _server
+
+
+server = build_server()
