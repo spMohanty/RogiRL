@@ -40,6 +40,7 @@ class RogiSimEnv(gym.Env):
                     },
                     max_simulation_timesteps=200,
                     early_stopping_patience=14,
+                    use_renderer=False,
                     toric=True,
                     debug=False)
         self.config = {}
@@ -50,6 +51,8 @@ class RogiSimEnv(gym.Env):
 
         self.width = self.config["width"]
         self.height = self.config["height"]
+
+        self.use_renderer = self.config["use_renderer"]
 
         self.action_space = spaces.MultiDiscrete(
             [
@@ -67,7 +70,6 @@ class RogiSimEnv(gym.Env):
         self.running_score = None
         self.np_random = np.random
 
-        self.use_renderer = False
         self.renderer = False
 
         self.viewer = None
@@ -311,6 +313,7 @@ if __name__ == "__main__":
                     },
                     max_simulation_timesteps=200,
                     early_stopping_patience=14,
+                    use_renderer=False,
                     toric=True,
                     debug=True)
     env = RogiSimEnv(config=env_config)
