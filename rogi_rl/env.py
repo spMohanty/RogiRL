@@ -9,7 +9,6 @@ import numpy as np
 from rogi_rl.agent_state import AgentState
 from rogi_rl.model import DiseaseSimModel
 
-
 class ActionType(Enum):
     STEP = 0
     VACCINATE = 1
@@ -60,6 +59,16 @@ class RogiSimEnv(gym.Env):
         self.running_score = None
         self.np_random = np.random
 
+        self.use_renderer = False
+        self.renderer = False
+
+        self.viewer = None
+
+        if self.use_renderer:
+            self.initialize_renderer()
+
+        self.reward = 0
+
     def reset(self):
         # Delete Model if already exists
         if self._model:
@@ -109,6 +118,71 @@ class RogiSimEnv(gym.Env):
         # return observation
         return self._model.get_observation()
 
+    def initialize_renderer(self):
+
+        from rogi_rl.renderer import Renderer
+
+        self.renderer = Renderer(
+                grid_size=(self.width, self.height)
+            )
+        self.renderer.setup()
+
+    def update_renderer(self, mode='human'):
+        """
+        Updates the latest board state on the renderer
+        """
+        if mode == "human":
+            from gym.envs.classic_control import rendering
+            # Draw Renderer
+            # Update Renderer State
+            model = self._model
+            scheduler = model.get_scheduler()
+            total_agents = scheduler.get_agent_count()
+            state_metrics = self.get_current_game_metrics()
+
+            initial_vaccines = int(model.initial_vaccination_fraction * model.n_agents)
+
+            _vaccines_given = model.max_vaccines - model.n_vaccines - initial_vaccines
+
+            _simulation_steps = int(scheduler.steps)
+
+            # Game Steps includes steps in which each agent is vaccinated
+            _game_steps = _simulation_steps + _vaccines_given
+
+            self.renderer.update_stats("SCORE", "{:.3f}".format(self.reward))
+
+            self.renderer.update_stats("VACCINE_BUDGET", "{}".format(model.n_vaccines))
+
+            self.renderer.update_stats("SIMULATION_TICKS", "{}".format(_simulation_steps))
+
+            self.renderer.update_stats("GAME_TICKS", "{}".format(_game_steps))
+
+            for _state in AgentState:
+                key = f"population.{_state.name}"
+                stats = state_metrics[key]
+                self.renderer.update_stats(
+                    key,
+                    "{} ({:.2f}%)".format(
+                        int(stats * total_agents),
+                        stats*100
+                    )
+                )
+                color = self.renderer.COLOR_MAP.get_color(_state)
+                agents = scheduler.get_agents_by_state(_state)
+                for _agent in agents:
+                    _agent_x, _agent_y = _agent.pos
+                    self.renderer.draw_cell(
+                                _agent_x, _agent_y,
+                                color
+                            )
+
+            # Update the rest of the renderer
+            self.renderer.pre_render()
+            self.renderer.post_render()
+            return True
+
+        return False
+
     def get_current_game_score(self):
         """
         Returns the current game score
@@ -126,11 +200,8 @@ class RogiSimEnv(gym.Env):
         """
         _d = {}
         # current population fraction of different states
-        _d["population.susceptible"] = self._model.get_population_fraction_by_state(AgentState.SUSCEPTIBLE)
-        _d["population.exposed"] = self._model.get_population_fraction_by_state(AgentState.EXPOSED)
-        _d["population.infectious"] = self._model.get_population_fraction_by_state(AgentState.INFECTIOUS)
-        _d["population.symptomatic"] = self._model.get_population_fraction_by_state(AgentState.SYMPTOMATIC)
-        _d["population.vaccinated"] = self._model.get_population_fraction_by_state(AgentState.VACCINATED)
+        for _state in AgentState:
+            _d[f"population.{_state.name}"] = self._model.get_population_fraction_by_state(_state)
         return _d
 
     def step(self, action):
@@ -160,6 +231,7 @@ class RogiSimEnv(gym.Env):
         # Compute difference in game score
         current_score = self.get_current_game_score()
         _step_reward = current_score - self.running_score
+        self.reward = _step_reward
         self.running_score = current_score
 
         # Add custom game metrics to info key
@@ -179,7 +251,15 @@ class RogiSimEnv(gym.Env):
         This methods provides the option to render the environment's behavior to a window 
         which should be readable to the human eye if mode is set to 'human'.
         """
-        pass
+        if not self.renderer:
+            self.initialize_renderer()
+
+        self.update_renderer(mode= mode)
+
+    def close(self):
+        if self.viewer:
+            self.viewer.close()
+            self.viewer = None
 
 
 

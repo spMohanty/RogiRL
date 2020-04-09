@@ -187,6 +187,15 @@ class DiseaseSimModel(Model):
         # Assertion disabled for perf reasons
         return self.observation
 
+    ##########################################################################################
+    ##########################################################################################
+    # Scheduler
+    #       - Functions for easy access to scheduler
+    ##########################################################################################
+
+    def get_scheduler(self):
+        return self.schedule
+
     def get_population_fraction_by_state(self, state: AgentState):
         return self.schedule.get_agent_fraction_by_state(state)
 
