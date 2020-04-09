@@ -63,6 +63,7 @@ _config =  dict(
     max_timesteps=200, # maximum timesteps per episode 
     early_stopping_patience=14, # in-simulator steps to wait with the same susceptible population fraction before concluding that the simulation has ended
     toric=True, # Make the grid world toric
+    use_renderer=False, # Boolean flag to enable or disable the renderer
     debug=True)
 
 env = RogiEnv(config=_config)
