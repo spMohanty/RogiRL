@@ -1,6 +1,6 @@
 from enum import Enum
 
-# Susceptible, Exposed, Infectious, Symptomatic, Recovered/Dead
+
 class VaccinationResponse(Enum):
     VACCINATION_SUCCESS = 0
     CELL_EMPTY = 1
