@@ -1,5 +1,5 @@
 import gym
-from gym import error, spaces, utils
+from gym import spaces
 from gym.utils import seeding
 
 from enum import Enum
@@ -10,16 +10,19 @@ from rogi_rl.agent_state import AgentState
 from rogi_rl.model import DiseaseSimModel
 from rogi_rl.vaccination_response import VaccinationResponse
 
+
 class ActionType(Enum):
     STEP = 0
     VACCINATE = 1
 
+
 class RogiSimEnv(gym.Env):
     metadata = {'render.modes': ['human']}
+
     def __init__(self, config={}):
         # Setup Config
         self.default_config = dict(
-                    width=50, 
+                    width=50,
                     height=50,
                     population_density=0.75,
                     vaccine_density=0.05,
@@ -28,12 +31,12 @@ class RogiSimEnv(gym.Env):
                     prob_infection=0.2,
                     prob_agent_movement=0.0,
                     disease_planner_config={
-                        "latent_period_mu" :  2 * 4,
-                        "latent_period_sigma" :  0,
-                        "incubation_period_mu" :  5 * 4,
-                        "incubation_period_sigma" :  0,
-                        "recovery_period_mu" :  14 * 4,
-                        "recovery_period_sigma" :  0,
+                        "latent_period_mu": 2 * 4,
+                        "latent_period_sigma": 0,
+                        "incubation_period_mu": 5 * 4,
+                        "incubation_period_sigma": 0,
+                        "recovery_period_mu": 14 * 4,
+                        "recovery_period_sigma": 0,
                     },
                     max_simulation_timesteps=200,
                     early_stopping_patience=14,
@@ -42,7 +45,7 @@ class RogiSimEnv(gym.Env):
         self.config = {}
         self.config.update(self.default_config)
         self.config.update(self.config)
-        
+
         self.debug = self.config["debug"]
 
         self.width = self.config["width"]
@@ -52,9 +55,13 @@ class RogiSimEnv(gym.Env):
             [
                 len(ActionType), self.width, self.height
             ])
-        self.observation_space = spaces.Box(low=np.float32(0), high=np.float32(1), shape=(
-            self.width, self.height, len(AgentState)
-        ))
+        self.observation_space = spaces.Box(
+                                    low=np.float32(0),
+                                    high=np.float32(1),
+                                    shape=(
+                                        self.width,
+                                        self.height,
+                                        len(AgentState)))
 
         self._model = None
         self.running_score = None
@@ -80,35 +87,37 @@ class RogiSimEnv(gym.Env):
         population_density = self.config['population_density']
         vaccine_density = self.config['vaccine_density']
         initial_infection_fraction = self.config['initial_infection_fraction']
-        initial_vaccination_fraction = self.config['initial_vaccination_fraction']
+        initial_vaccination_fraction = \
+            self.config['initial_vaccination_fraction']
         prob_infection = self.config['prob_infection']
         prob_agent_movement = self.config['prob_agent_movement']
         disease_planner_config = self.config['disease_planner_config']
         max_simulation_timesteps = self.config['max_simulation_timesteps']
-        early_stopping_patience=self.config['early_stopping_patience']
+        early_stopping_patience = \
+            self.config['early_stopping_patience']
         toric = self.config['toric']
-        debug = self.config['debug']
 
         """
         Seeding Strategy :
             - The env maintains a custom seed/unsseded np.random instance
             accessible at self.np_random
 
-            whenever env.seed() is called, the said np_random instance is seeded
+            whenever env.seed() is called, the said np_random instance
+            is seeded
 
-            and during every new instantiation of a DiseaseEngine instance, it is seeded
-            with a random number sampled from the self.np_random. 
+            and during every new instantiation of a DiseaseEngine instance,
+            it is seeded with a random number sampled from the self.np_random.
         """
         _simulator_instance_seed = self.np_random.rand()
         # Instantiate Disease Model
         self._model = DiseaseSimModel(
-            width, height, 
+            width, height,
             population_density, vaccine_density,
             initial_infection_fraction, initial_vaccination_fraction,
             prob_infection, prob_agent_movement,
-            disease_planner_config, 
+            disease_planner_config,
             max_simulation_timesteps, early_stopping_patience,
-            toric, seed = _simulator_instance_seed
+            toric, seed=_simulator_instance_seed
         )
 
         # Set the max timesteps of an env as the sum of :
@@ -141,7 +150,6 @@ class RogiSimEnv(gym.Env):
         Updates the latest board state on the renderer
         """
         if mode == "human":
-            from gym.envs.classic_control import rendering
             # Draw Renderer
             # Update Renderer State
             model = self._model
@@ -149,9 +157,11 @@ class RogiSimEnv(gym.Env):
             total_agents = scheduler.get_agent_count()
             state_metrics = self.get_current_game_metrics()
 
-            initial_vaccines = int(model.initial_vaccination_fraction * model.n_agents)
+            initial_vaccines = int(
+                model.initial_vaccination_fraction * model.n_agents)
 
-            _vaccines_given = model.max_vaccines - model.n_vaccines - initial_vaccines
+            _vaccines_given = \
+                model.max_vaccines - model.n_vaccines - initial_vaccines
 
             _simulation_steps = int(scheduler.steps)
 
@@ -159,11 +169,10 @@ class RogiSimEnv(gym.Env):
             _game_steps = _simulation_steps + _vaccines_given
 
             self.renderer.update_stats("SCORE", "{:.3f}".format(self.reward))
-
-            self.renderer.update_stats("VACCINE_BUDGET", "{}".format(model.n_vaccines))
-
-            self.renderer.update_stats("SIMULATION_TICKS", "{}".format(_simulation_steps))
-
+            self.renderer.update_stats("VACCINE_BUDGET", "{}".format(
+                model.n_vaccines))
+            self.renderer.update_stats("SIMULATION_TICKS", "{}".format(
+                _simulation_steps))
             self.renderer.update_stats("GAME_TICKS", "{}".format(_game_steps))
 
             for _state in AgentState:
@@ -196,7 +205,7 @@ class RogiSimEnv(gym.Env):
         """
         Returns the current game score
 
-        The game score is currently represented as : 
+        The game score is currently represented as :
             (percentage of susceptibles left in the population)
         """
         return self._model.get_population_fraction_by_state(
@@ -210,19 +219,20 @@ class RogiSimEnv(gym.Env):
         _d = {}
         # current population fraction of different states
         for _state in AgentState:
-            _d[f"population.{_state.name}"] = self._model.get_population_fraction_by_state(_state)
+            _d[f"population.{_state.name}"] = \
+                self._model.get_population_fraction_by_state(_state)
         return _d
 
     def step(self, action):
         assert self.action_space.contains(
-            action), "%r (%s) invalid" % (action, type(action))        
-        if self._model == None:
+            action), "%r (%s) invalid" % (action, type(action))
+        if self._model is None:
             raise Exception("env.step() called before calling env.reset()")
-        
+
         action = [int(x) for x in action]
         if self.debug:
             print(action)
-        
+
         action_type = action[0]
         cell_x = action[1]
         cell_y = action[2]
@@ -234,7 +244,8 @@ class RogiSimEnv(gym.Env):
             self._model.tick()
             _observation = self._model.get_observation()
         elif action_type == ActionType.VACCINATE.value:
-            vaccination_success, response = self._model.vaccinate_cell(cell_x, cell_y)
+            vaccination_success, response = \
+                self._model.vaccinate_cell(cell_x, cell_y)
             _observation = self._model.get_observation()
 
             # Force Run simulation to completion if
@@ -255,7 +266,7 @@ class RogiSimEnv(gym.Env):
         for _key in game_metrics.keys():
             _info[_key] = game_metrics[_key]
 
-        _done = not self._model.is_running() 
+        _done = not self._model.is_running()
         return _observation, _step_reward, _done, _info
 
     def seed(self, seed=None):
@@ -264,13 +275,14 @@ class RogiSimEnv(gym.Env):
 
     def render(self, mode='human', close=False):
         """
-        This methods provides the option to render the environment's behavior to a window 
-        which should be readable to the human eye if mode is set to 'human'.
+        This methods provides the option to render the
+        environment's behavior to a window which should be
+        readable to the human eye if mode is set to 'human'.
         """
         if not self.renderer:
             self.initialize_renderer()
 
-        self.update_renderer(mode= mode)
+        self.update_renderer(mode=mode)
 
     def close(self):
         if self.viewer:
@@ -278,11 +290,10 @@ class RogiSimEnv(gym.Env):
             self.viewer = None
 
 
-
 if __name__ == "__main__":
 
     env_config = dict(
-                    width=50, 
+                    width=50,
                     height=50,
                     population_density=0.75,
                     vaccine_density=0.05,
@@ -291,12 +302,12 @@ if __name__ == "__main__":
                     prob_infection=0.2,
                     prob_agent_movement=0.0,
                     disease_planner_config={
-                        "latent_period_mu" :  2 * 4,
-                        "latent_period_sigma" :  0,
-                        "incubation_period_mu" :  5 * 4,
-                        "incubation_period_sigma" :  0,
-                        "recovery_period_mu" :  14 * 4,
-                        "recovery_period_sigma" :  0,
+                        "latent_period_mu":  2 * 4,
+                        "latent_period_sigma":  0,
+                        "incubation_period_mu":  5 * 4,
+                        "incubation_period_sigma":  0,
+                        "recovery_period_mu":  14 * 4,
+                        "recovery_period_sigma":  0,
                     },
                     max_simulation_timesteps=200,
                     early_stopping_patience=14,
