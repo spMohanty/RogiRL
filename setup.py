@@ -4,23 +4,23 @@
 
 from setuptools import setup, find_packages
 
-## TODO - convert md to RST before submitting to PyPI
+# TODO - convert md to RST before submitting to PyPI
 with open('README.md') as readme_file:
     readme = readme_file.read()
 
 with open('HISTORY.rst') as history_file:
     history = history_file.read()
 
-requirements =  [
+requirements = [
                     'Click>=7.0',
                     'gym>=0.17.1',
                     'numpy>=1.18',
                     'mesa>=0.8.6'
                 ]
 
-setup_requirements = [ ]
+setup_requirements = []
 
-test_requirements = [ ]
+test_requirements = []
 
 setup(
     author="Sharada Mohanty",
