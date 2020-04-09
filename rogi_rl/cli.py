@@ -3,7 +3,6 @@ import sys
 import click
 
 
-
 @click.command()
 def demo(args=None):
     """
@@ -12,5 +11,6 @@ def demo(args=None):
     from rogi_rl.server import server  # noqa
     server.launch()
 
+
 if __name__ == "__main__":
-    sys.exit(main())  # pragma: no cover
+    sys.exit(demo())  # pragma: no cover
