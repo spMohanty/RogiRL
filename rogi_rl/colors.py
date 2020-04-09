@@ -1,5 +1,6 @@
 from rogi_rl.agent_state import AgentState
 
+
 class Colors:
     """
     Reference : https://materialuicolors.co/
@@ -26,8 +27,9 @@ class Colors:
     DEEP_ORANGE = (244, 81, 30)
     BROWN = (109, 76, 65)
     GREY = (117, 117, 117)
-    LIGHT_GREY = ( 234, 237, 237 )
+    LIGHT_GREY = (234, 237, 237)
     BLUE_GREY = (84, 110, 122)
+
 
 class ColorMap:
     def __init__(self):
@@ -48,7 +50,7 @@ class ColorMap:
                 self.COLOR_MAP[_state] = self.COLORS.BLUE
             elif _state == AgentState.VACCINATED:
                 self.COLOR_MAP[_state] = self.COLORS.YELLOW
-        
+
         self.COLOR_MAP["BACKGROUND_COLOR"] = self.COLORS.WHITE
         self.COLOR_MAP["AGENT_STATE_TEXT_COLOR"] = self.COLORS.GREY
 
@@ -56,12 +58,10 @@ class ColorMap:
         try:
             return self.COLOR_MAP[d]
         except KeyError:
-                raise NotImplementedError("Unknown key in ColorMap. Was it initialized ?")
-
+            raise NotImplementedError(
+                    "Unknown key in ColorMap. Was it initialized ?")
 
 
 if __name__ == "__main__":
     colors = Colors()
     # TODO setup a small pygame setup to display all the colors in the palette
-
-
