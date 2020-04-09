@@ -233,7 +233,7 @@ class RogiSimEnv(gym.Env):
 
         action = [int(x) for x in action]
         if self.debug:
-            print(action)
+            print("Action : ", action)
 
         action_type = action[0]
         cell_x = action[1]
