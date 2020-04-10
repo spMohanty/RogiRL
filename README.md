@@ -64,6 +64,7 @@ _config =  dict(
     early_stopping_patience=14, # in-simulator steps to wait with the same susceptible population fraction before concluding that the simulation has ended
     use_renderer=False, # Boolean flag to enable or disable the renderer
     toric=True, # Make the grid world toric
+    dummy_simulation=False, # Send dummy observations, rewards etc. Useful when doing integration testing with RL Experiments codebase
     debug=True)
 
 env = RogiEnv(config=_config)
