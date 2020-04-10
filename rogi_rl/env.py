@@ -17,7 +17,8 @@ class ActionType(Enum):
 
 
 class RogiSimEnv(gym.Env):
-    metadata = {'render.modes': ['human']}
+    metadata = {'render.modes': ['human'],
+                'video.frames_per_second': 50}
 
     def __init__(self, config={}):
         # Setup Config
@@ -73,8 +74,6 @@ class RogiSimEnv(gym.Env):
         self.np_random = np.random
 
         self.renderer = False
-
-        self.viewer = None
 
         if self.use_renderer:
             self.initialize_renderer()
@@ -208,7 +207,7 @@ class RogiSimEnv(gym.Env):
             # Update the rest of the renderer
             self.renderer.pre_render()
             self.renderer.post_render()
-            return True
+            return self.renderer.screen.isopen
 
         return False
 
@@ -323,9 +322,9 @@ class RogiSimEnv(gym.Env):
         self.update_renderer(mode=mode)
 
     def close(self):
-        if self.viewer:
-            self.viewer.close()
-            self.viewer = None
+        if not self.renderer:
+            self.renderer.screen.close()
+            self.renderer = False
 
 
 if __name__ == "__main__":
