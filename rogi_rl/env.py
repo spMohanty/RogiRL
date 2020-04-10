@@ -225,7 +225,7 @@ class RogiSimEnv(gym.Env):
 
     def get_current_game_metrics(self, dummy_simulation=False):
         """
-        Returns a dictionary containing import game metrics
+        Returns a dictionary containing important game metrics
         """
         _d = {}
         # current population fraction of different states
@@ -234,8 +234,9 @@ class RogiSimEnv(gym.Env):
                 _value = self._model.get_population_fraction_by_state(_state)
             else:
                 _value = self.np_random.rand()
-
             _d[f"population.{_state.name}"] = _value
+        # Add R0 to the game metrics
+        _d["R0/10"] = self._model.contact_network.compute_R0()/10.0
         return _d
 
     def step(self, action):

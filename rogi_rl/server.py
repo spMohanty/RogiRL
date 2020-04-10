@@ -72,6 +72,14 @@ def build_server(grid_width=50, grid_height=50):
                                         "Color": "rgb{}".format(
                                             COLOR_MAP.get_color(
                                                 AgentState.VACCINATED))
+                                    },
+                                    {
+                                        "Label": "R0/10",
+                                        "Color": "rgb{}".format(
+                                            COLOR_MAP.get_color(
+                                                "R0/10"
+                                            )
+                                        )
                                     }
                                 ])
     model_params = {

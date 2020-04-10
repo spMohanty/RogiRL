@@ -9,6 +9,7 @@ from rogi_rl.disease_planner import SEIRDiseasePlanner
 from rogi_rl.scheduler import CustomScheduler
 from rogi_rl.agent_state import AgentState
 from rogi_rl.vaccination_response import VaccinationResponse
+from rogi_rl.contact_network import ContactNetwork
 
 
 class DiseaseSimModel(Model):
@@ -76,6 +77,7 @@ class DiseaseSimModel(Model):
         self.initialize_disease_planner()
         self.initialize_scheduler()
         self.initialize_grid()
+        self.initialize_contact_network()
         self.initialize_agents(
             infection_fraction=self.initial_infection_fraction,
             vaccination_fraction=self.initial_vaccination_fraction
@@ -122,6 +124,12 @@ class DiseaseSimModel(Model):
         """
         self.grid = SingleGrid(
             width=self.width, height=self.height, torus=self.toric)
+
+    def initialize_contact_network(self):
+        """
+        Initializes the contact network
+        """
+        self.contact_network = ContactNetwork()
 
     def initialize_agents(self, infection_fraction, vaccination_fraction):
         """
@@ -183,7 +191,8 @@ class DiseaseSimModel(Model):
                 "Infectious": lambda m: m.get_population_fraction_by_state(AgentState.INFECTIOUS),  # noqa
                 "Symptomatic": lambda m: m.get_population_fraction_by_state(AgentState.SYMPTOMATIC),  # noqa
                 "Recovered": lambda m: m.get_population_fraction_by_state(AgentState.RECOVERED),  # noqa
-                "Vaccinated": lambda m: m.get_population_fraction_by_state(AgentState.VACCINATED)  # noqa
+                "Vaccinated": lambda m: m.get_population_fraction_by_state(AgentState.VACCINATED),  # noqa
+                "R0/10": lambda m: m.contact_network.compute_R0()/10.0
             }
         )
 
@@ -334,6 +343,11 @@ class DiseaseSimModel(Model):
                 if _target_candidate.state == AgentState.SUSCEPTIBLE:
                     _target_candidate.trigger_infection(
                         prob_infection=self.prob_infection)
+                    # Register infection in the contact network
+                    self.contact_network.register_infection_spread(
+                        _infectious_agent,
+                        _target_candidate
+                    )
 
 
 if __name__ == "__main__":
