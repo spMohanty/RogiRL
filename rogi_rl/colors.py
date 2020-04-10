@@ -51,6 +51,8 @@ class ColorMap:
             elif _state == AgentState.VACCINATED:
                 self.COLOR_MAP[_state] = self.COLORS.YELLOW
 
+        self.COLOR_MAP["R0/10"] = self.COLORS.BLUE_GREY
+
         self.COLOR_MAP["BACKGROUND_COLOR"] = self.COLORS.WHITE
         self.COLOR_MAP["AGENT_STATE_TEXT_COLOR"] = self.COLORS.GREY
 

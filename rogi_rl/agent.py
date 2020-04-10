@@ -59,8 +59,12 @@ class DiseaseSimAgent(Agent):  # noqa
             pass
 
     def trigger_infection(self, prob_infection=1.0):
+        """
+        Attempts to trigger an infection, and if infection is triggered,
+        then it returns True, else returns False.
+        """
         if self._is_infection_scheduled:
-            return
+            return False
         else:
             if self.random.random() < prob_infection:
                 # Prepare a disease plan
@@ -79,6 +83,9 @@ class DiseaseSimAgent(Agent):  # noqa
                     # Mark the state transition plan for the said timestep
                     self.state_transition_plan[_agent_event.update_timestep] = _agent_event  # noqa
                 self._is_infection_scheduled = True
+                return True
+            else:
+                return False
 
     def move_to(self, new_position):
         """

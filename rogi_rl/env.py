@@ -42,11 +42,13 @@ class RogiSimEnv(gym.Env):
                     early_stopping_patience=14,
                     use_renderer=False,
                     toric=True,
+                    dummy_simulation=False,
                     debug=False)
         self.config = {}
         self.config.update(self.default_config)
         self.config.update(config)
 
+        self.dummy_simulation = self.config["dummy_simulation"]
         self.debug = self.config["debug"]
 
         self.width = self.config["width"]
@@ -83,6 +85,13 @@ class RogiSimEnv(gym.Env):
         # Delete Model if already exists
         if self._model:
             del self._model
+
+        if self.dummy_simulation:
+            """
+            In dummy simulation mode
+            return a randomly sampled observation
+            """
+            return self.observation_space.sample()
 
         width = self.config['width']
         height = self.config['height']
@@ -214,18 +223,27 @@ class RogiSimEnv(gym.Env):
                 AgentState.SUSCEPTIBLE
             )
 
-    def get_current_game_metrics(self):
+    def get_current_game_metrics(self, dummy_simulation=False):
         """
-        Returns a dictionary containing import game metrics
+        Returns a dictionary containing important game metrics
         """
         _d = {}
         # current population fraction of different states
         for _state in AgentState:
-            _d[f"population.{_state.name}"] = \
-                self._model.get_population_fraction_by_state(_state)
+            if not dummy_simulation:
+                _value = self._model.get_population_fraction_by_state(_state)
+            else:
+                _value = self.np_random.rand()
+            _d[f"population.{_state.name}"] = _value
+        # Add R0 to the game metrics
+        _d["R0/10"] = self._model.contact_network.compute_R0()/10.0
         return _d
 
     def step(self, action):
+        # Handle dummy_simulation Mode
+        if self.dummy_simulation:
+            return self.dummy_env_step()
+
         assert self.action_space.contains(
             action), "%r (%s) invalid" % (action, type(action))
         if self._model is None:
@@ -235,6 +253,7 @@ class RogiSimEnv(gym.Env):
         if self.debug:
             print("Action : ", action)
 
+        # Handle action propagation in real simulator
         action_type = action[0]
         cell_x = action[1]
         cell_y = action[2]
@@ -270,6 +289,20 @@ class RogiSimEnv(gym.Env):
 
         _done = not self._model.is_running()
         return _observation, _step_reward, _done, _info
+
+    def dummy_env_step(self):
+        """
+        Implements a fake env.step for faster Integration Testing
+        with RL experiments framework
+        """
+        observation = self.observation_space.sample()
+        reward = self.np_random.rand()
+        done = True if self.np_random.rand() < 0.01 else False
+        info = {}
+        game_metrics = self.get_current_game_metrics(dummy_simulation=True)
+        info.update(game_metrics)
+
+        return observation, reward, done, info
 
     def seed(self, seed=None):
         self.np_random, seed = seeding.np_random(seed)
@@ -318,6 +351,7 @@ if __name__ == "__main__":
                     early_stopping_patience=14,
                     use_renderer=False,
                     toric=True,
+                    dummy_simulation=False,
                     debug=True)
     env = RogiSimEnv(config=env_config)
     print("USE RENDERER ?", env.use_renderer)
