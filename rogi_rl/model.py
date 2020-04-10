@@ -341,13 +341,15 @@ class DiseaseSimModel(Model):
             )
             for _target_candidate in target_candidates:
                 if _target_candidate.state == AgentState.SUSCEPTIBLE:
-                    _target_candidate.trigger_infection(
-                        prob_infection=self.prob_infection)
-                    # Register infection in the contact network
-                    self.contact_network.register_infection_spread(
-                        _infectious_agent,
-                        _target_candidate
-                    )
+                    was_infection_successful =\
+                         _target_candidate.trigger_infection(
+                            prob_infection=self.prob_infection)
+                    if was_infection_successful:
+                        # Register infection in the contact network
+                        self.contact_network.register_infection_spread(
+                            _infectious_agent,
+                            _target_candidate
+                        )
 
 
 if __name__ == "__main__":

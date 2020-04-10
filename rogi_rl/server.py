@@ -86,8 +86,8 @@ def build_server(grid_width=50, grid_height=50):
         "width": grid_width,
         "height": grid_height,
         "population_density": UserSettableParameter(
-                    'slider', 'Population Density', value=0.1,
-                    min_value=0.01, max_value=0.99, step=0.01
+                    'slider', 'Population Density', value=1.0,
+                    min_value=0.01, max_value=1.0, step=0.01
                     ),
         "vaccine_density": UserSettableParameter(
                     'slider', 'Vaccine Density', value=0.0,
@@ -95,17 +95,17 @@ def build_server(grid_width=50, grid_height=50):
                     ),
         "initial_infection_fraction":
             UserSettableParameter(
-                    'slider', 'Initial Infection Fraction', value=0.1,
+                    'slider', 'Initial Infection Fraction', value=0.05,
                     min_value=0.01, max_value=0.99, step=0.01
                     ),
         "initial_vaccination_fraction":
             UserSettableParameter(
-                    'slider', 'Initial Vaccination Fraction', value=0.05,
-                    min_value=0.01, max_value=0.99, step=0.01
+                    'slider', 'Initial Vaccination Fraction', value=0.00,
+                    min_value=0.00, max_value=0.99, step=0.01
                     ),
         "prob_infection":
             UserSettableParameter(
-                    'slider', 'Infection Probability', value=0.2,
+                    'slider', 'Infection Probability', value=0.05,
                     min_value=0.01, max_value=1.0, step=0.01
                     ),
         "prob_agent_movement":
