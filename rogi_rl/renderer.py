@@ -309,7 +309,15 @@ class Renderer:
         self.screen.window.dispatch_events()
         return False
 
-    def post_render(self):
+    def post_render(self, return_rgb_array=False):
+        """
+        Some part of the code is taken from the file
+        https://github.com/openai/gym/blob/master/gym/envs/classic_control/rendering.py
+        The render method of class `viewer` clears the window.
+        This also results in any text on the screen to be lost
+        Hence we copy the contents of the `render` function and modify it
+        """
+
         self.prepare_render()
 
         dict_texts = self.stats['TEXT_STRINGS']
@@ -326,7 +334,23 @@ class Renderer:
         self.screen.transform.disable()
         self.screen.window.flip()
         self.screen.onetime_geoms = []
-        return self.screen.isopen
+
+        arr = None
+        if return_rgb_array:
+            buffer = pyglet.image.get_buffer_manager().get_color_buffer()
+            image_data = buffer.get_image_data()
+            arr = np.frombuffer(image_data.get_data(), dtype=np.uint8)
+            # In https://github.com/openai/gym-http-api/issues/2, we
+            # discovered that someone using Xmonad on Arch was having
+            # a window of size 598 x 398, though a 600 x 400 window
+            # was requested. (Guess Xmonad was preserving a pixel for
+            # the boundary.) So we use the buffer height/width rather
+            # than the requested one.
+            arr = arr.reshape(buffer.height, buffer.width, 4)
+            arr = arr[::-1, :, 0:3]
+        self.screen.window.flip()
+        self.onetime_geoms = []
+        return arr if return_rgb_array else self.screen.isopen
 
 
 if __name__ == "__main__":

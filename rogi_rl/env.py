@@ -1,5 +1,5 @@
 import gym
-from gym import spaces
+from gym import spaces, wrappers
 from gym.utils import seeding
 
 from enum import Enum
@@ -17,8 +17,8 @@ class ActionType(Enum):
 
 
 class RogiSimEnv(gym.Env):
-    metadata = {'render.modes': ['human'],
-                'video.frames_per_second': 50}
+    metadata = {'render.modes': ['human', 'rgb_array'],
+                'video.frames_per_second': 5}
 
     def __init__(self, config={}):
         # Setup Config
@@ -159,57 +159,55 @@ class RogiSimEnv(gym.Env):
         """
         Updates the latest board state on the renderer
         """
-        if mode == "human":
-            # Draw Renderer
-            # Update Renderer State
-            model = self._model
-            scheduler = model.get_scheduler()
-            total_agents = scheduler.get_agent_count()
-            state_metrics = self.get_current_game_metrics()
+        # Draw Renderer
+        # Update Renderer State
+        model = self._model
+        scheduler = model.get_scheduler()
+        total_agents = scheduler.get_agent_count()
+        state_metrics = self.get_current_game_metrics()
 
-            initial_vaccines = int(
-                model.initial_vaccination_fraction * model.n_agents)
+        initial_vaccines = int(
+            model.initial_vaccination_fraction * model.n_agents)
 
-            _vaccines_given = \
-                model.max_vaccines - model.n_vaccines - initial_vaccines
+        _vaccines_given = \
+            model.max_vaccines - model.n_vaccines - initial_vaccines
 
-            _simulation_steps = int(scheduler.steps)
+        _simulation_steps = int(scheduler.steps)
 
-            # Game Steps includes steps in which each agent is vaccinated
-            _game_steps = _simulation_steps + _vaccines_given
+        # Game Steps includes steps in which each agent is vaccinated
+        _game_steps = _simulation_steps + _vaccines_given
 
-            self.renderer.update_stats("SCORE", "{:.3f}".format(self.reward))
-            self.renderer.update_stats("VACCINE_BUDGET", "{}".format(
-                model.n_vaccines))
-            self.renderer.update_stats("SIMULATION_TICKS", "{}".format(
-                _simulation_steps))
-            self.renderer.update_stats("GAME_TICKS", "{}".format(_game_steps))
+        self.renderer.update_stats("SCORE", "{:.3f}".format(self.reward))
+        self.renderer.update_stats("VACCINE_BUDGET", "{}".format(
+            model.n_vaccines))
+        self.renderer.update_stats("SIMULATION_TICKS", "{}".format(
+            _simulation_steps))
+        self.renderer.update_stats("GAME_TICKS", "{}".format(_game_steps))
 
-            for _state in AgentState:
-                key = f"population.{_state.name}"
-                stats = state_metrics[key]
-                self.renderer.update_stats(
-                    key,
-                    "{} ({:.2f}%)".format(
-                        int(stats * total_agents),
-                        stats*100
-                    )
+        for _state in AgentState:
+            key = f"population.{_state.name}"
+            stats = state_metrics[key]
+            self.renderer.update_stats(
+                key,
+                "{} ({:.2f}%)".format(
+                    int(stats * total_agents),
+                    stats*100
                 )
-                color = self.renderer.COLOR_MAP.get_color(_state)
-                agents = scheduler.get_agents_by_state(_state)
-                for _agent in agents:
-                    _agent_x, _agent_y = _agent.pos
-                    self.renderer.draw_cell(
-                                _agent_x, _agent_y,
-                                color
-                            )
+            )
+            color = self.renderer.COLOR_MAP.get_color(_state)
+            agents = scheduler.get_agents_by_state(_state)
+            for _agent in agents:
+                _agent_x, _agent_y = _agent.pos
+                self.renderer.draw_cell(
+                            _agent_x, _agent_y,
+                            color
+                        )
 
-            # Update the rest of the renderer
-            self.renderer.pre_render()
-            self.renderer.post_render()
-            return self.renderer.screen.isopen
-
-        return False
+        # Update the rest of the renderer
+        self.renderer.pre_render()
+        return_rgb_array = mode == 'rgb_array'
+        status = self.renderer.post_render(return_rgb_array)
+        return status
 
     def get_current_game_score(self):
         """
@@ -307,7 +305,7 @@ class RogiSimEnv(gym.Env):
         self.np_random, seed = seeding.np_random(seed)
         return [seed]
 
-    def render(self, mode='human', close=False):
+    def render(self, mode='human'):
         """
         This methods provides the option to render the
         environment's behavior to a window which should be
@@ -319,7 +317,7 @@ class RogiSimEnv(gym.Env):
         if not self.renderer:
             self.initialize_renderer()
 
-        self.update_renderer(mode=mode)
+        return self.update_renderer(mode=mode)
 
     def close(self):
         if not self.renderer:
@@ -354,6 +352,10 @@ if __name__ == "__main__":
                     debug=True)
     env = RogiSimEnv(config=env_config)
     print("USE RENDERER ?", env.use_renderer)
+    record = False
+    if record:
+        # records the the rendering in the `recording` folder
+        env = wrappers.Monitor(env, "recording", force=True)
     observation = env.reset()
     done = False
     k = 0
