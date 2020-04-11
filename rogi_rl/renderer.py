@@ -67,6 +67,7 @@ class Renderer:
         # Game Progress
         self.stats["GAME_TICKS"] = 0
         self.stats["VACCINE_BUDGET"] = 0
+        self.stats["UNUSED_VACCINE_RATIO"] = 1
 
         self.stats["SCORE"] = 0
 
@@ -195,7 +196,8 @@ class Renderer:
         ))
 
         top_y -= 2 * rect_height + self.AGENT_STATUS_LINE_SPACE
-        for _state in ["SIMULATION_TICKS", "GAME_TICKS", "VACCINE_BUDGET"]:
+        for _state in ["SIMULATION_TICKS", "GAME_TICKS",
+                       "VACCINE_BUDGET", "UNUSED_VACCINE_RATIO"]:
             _text_string = str(self.stats[_state])
             _text_string += " "
             _text_string += _state

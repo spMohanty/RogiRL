@@ -174,6 +174,9 @@ class RogiSimEnv(gym.Env):
             _vaccines_given = \
                 model.max_vaccines - model.n_vaccines - initial_vaccines
 
+            _unused_vaccine_ratio = model.n_vaccines/(
+                _vaccines_given + model.n_vaccines)
+
             _simulation_steps = int(scheduler.steps)
 
             # Game Steps includes steps in which each agent is vaccinated
@@ -185,6 +188,9 @@ class RogiSimEnv(gym.Env):
             self.renderer.update_stats("SIMULATION_TICKS", "{}".format(
                 _simulation_steps))
             self.renderer.update_stats("GAME_TICKS", "{}".format(_game_steps))
+
+            self.renderer.update_stats("UNUSED_VACCINE_RATIO",
+                                       "{:.2f}".format(_unused_vaccine_ratio))
 
             for _state in AgentState:
                 key = f"population.{_state.name}"
@@ -237,6 +243,18 @@ class RogiSimEnv(gym.Env):
             _d[f"population.{_state.name}"] = _value
         # Add R0 to the game metrics
         _d["R0/10"] = self._model.contact_network.compute_R0()/10.0
+
+        # Add UNUSED VACCINE RATIO to the game metrics
+        model = self._model
+
+        initial_vaccines = int(
+                model.initial_vaccination_fraction * model.n_agents)
+
+        _unused_vaccine_ratio = model.n_vaccines/(
+                model.max_vaccines - initial_vaccines)
+
+        _d['UNUSED_VACCINE_RATIO'] = _unused_vaccine_ratio
+
         return _d
 
     def step(self, action):
