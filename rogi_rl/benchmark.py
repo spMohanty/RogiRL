@@ -13,7 +13,7 @@ https://github.com/maximecb/gym-miniworld/blob/master/benchmark.py
 render_profile_file = 'profile_stats_render'
 
 
-def performance_metrics(profile_render=False):
+def performance_metrics(render_on=False):
 
     st = time.time()
     env_config = dict(use_renderer=True)
@@ -38,7 +38,7 @@ def performance_metrics(profile_render=False):
     st = time.time()
     for i in range(1):
         # Profile the code
-        if profile_render:
+        if render_on:
             cProfile.runctx('env.render()', globals(), locals(),
                             filename=render_profile_file)
         else:
@@ -74,7 +74,7 @@ def performance_metrics(profile_render=False):
 
     env.close()
 
-    if profile_render:
+    if render_on:
         profile(render_profile_file)
 
 

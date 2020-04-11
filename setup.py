@@ -41,7 +41,7 @@ setup(
     entry_points={
         'console_scripts': [
             'rogi-rl-demo=rogi_rl.cli:demo',
-            'rogi-rl-profile_perf=rogi_rl.cli:profile_perf',
+            'rogi-rl-profile-perf=rogi_rl.cli:profile_perf',
         ],
     },
     install_requires=requirements,
