@@ -15,7 +15,8 @@ requirements = [
                     'Click>=7.0',
                     'gym>=0.17.1',
                     'numpy>=1.18',
-                    'mesa>=0.8.6'
+                    'mesa>=0.8.6',
+                    'colorama>=0.4.3'
                 ]
 
 setup_requirements = []

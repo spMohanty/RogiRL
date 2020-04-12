@@ -41,7 +41,7 @@ class RogiSimEnv(gym.Env):
                     },
                     max_simulation_timesteps=200,
                     early_stopping_patience=14,
-                    use_renderer=False,
+                    use_renderer=False,  # can be "human", "ascii"
                     toric=True,
                     dummy_simulation=False,
                     debug=False)
@@ -76,9 +76,9 @@ class RogiSimEnv(gym.Env):
         self.renderer = False
 
         if self.use_renderer:
-            self.initialize_renderer()
+            self.initialize_renderer(mode=self.use_renderer)
 
-        self.reward = 0
+        self.cumulative_reward = 0
 
     def reset(self):
         # Delete Model if already exists
@@ -140,20 +140,25 @@ class RogiSimEnv(gym.Env):
         # Tick model
         self._model.tick()
 
-        """
-        """
         self.running_score = self.get_current_game_score()
+        self.cumulative_reward = 0
         # return observation
         return self._model.get_observation()
 
-    def initialize_renderer(self):
+    def initialize_renderer(self, mode="human"):
+        if mode == "human":
+            from rogi_rl.renderer import Renderer
 
-        from rogi_rl.renderer import Renderer
-
-        self.renderer = Renderer(
-                grid_size=(self.width, self.height)
-            )
-        self.renderer.setup()
+            self.renderer = Renderer(
+                    grid_size=(self.width, self.height)
+                )
+        else:
+            """
+            Initialize ASCII Renderer here
+            """
+            from rogi_rl.renderer import ASCIIRenderer
+            self.renderer = ASCIIRenderer()
+        self.renderer.setup(mode=mode)
 
     def update_renderer(self, mode='human'):
         """
@@ -177,7 +182,9 @@ class RogiSimEnv(gym.Env):
         # Game Steps includes steps in which each agent is vaccinated
         _game_steps = _simulation_steps + _vaccines_given
 
-        self.renderer.update_stats("SCORE", "{:.3f}".format(self.reward))
+        self.renderer.update_stats(
+                    "SCORE",
+                    "{:.3f}".format(self.cumulative_reward))
         self.renderer.update_stats("VACCINE_BUDGET", "{}".format(
             model.n_vaccines))
         self.renderer.update_stats("SIMULATION_TICKS", "{}".format(
@@ -194,20 +201,24 @@ class RogiSimEnv(gym.Env):
                     stats*100
                 )
             )
-            color = self.renderer.COLOR_MAP.get_color(_state)
-            agents = scheduler.get_agents_by_state(_state)
-            for _agent in agents:
-                _agent_x, _agent_y = _agent.pos
-                self.renderer.draw_cell(
-                            _agent_x, _agent_y,
-                            color
-                        )
-
-        # Update the rest of the renderer
-        self.renderer.pre_render()
-        return_rgb_array = mode == 'rgb_array'
-        status = self.renderer.post_render(return_rgb_array)
-        return status
+            if mode == "human":
+                color = self.renderer.COLOR_MAP.get_color(_state)
+                agents = scheduler.get_agents_by_state(_state)
+                for _agent in agents:
+                    _agent_x, _agent_y = _agent.pos
+                    self.renderer.draw_cell(
+                                _agent_x, _agent_y,
+                                color
+                            )
+        if mode == "human":
+            # Update the rest of the renderer
+            self.renderer.pre_render()
+            return_rgb_array = mode == 'rgb_array'
+            status = self.renderer.post_render(return_rgb_array)
+            return status
+        elif mode == "ascii":
+            print(self.renderer.render(self._model.grid))
+            return True
 
     def get_current_game_score(self):
         """
@@ -276,7 +287,7 @@ class RogiSimEnv(gym.Env):
         # Compute difference in game score
         current_score = self.get_current_game_score()
         _step_reward = current_score - self.running_score
-        self.reward = _step_reward
+        self.cumulative_reward += _step_reward
         self.running_score = current_score
 
         # Add custom game metrics to info key
@@ -315,25 +326,25 @@ class RogiSimEnv(gym.Env):
             return
 
         if not self.renderer:
-            self.initialize_renderer()
+            self.initialize_renderer(mode=mode)
 
         return self.update_renderer(mode=mode)
 
     def close(self):
         if not self.renderer:
-            self.renderer.screen.close()
+            self.renderer.close()
             self.renderer = False
 
 
 if __name__ == "__main__":
 
     env_config = dict(
-                    width=50,
-                    height=50,
-                    population_density=0.75,
-                    vaccine_density=0.05,
-                    initial_infection_fraction=0.1,
-                    initial_vaccination_fraction=0.05,
+                    width=5,
+                    height=5,
+                    population_density=1.0,
+                    vaccine_density=1.0,
+                    initial_infection_fraction=0.04,
+                    initial_vaccination_fraction=0,
                     prob_infection=0.2,
                     prob_agent_movement=0.0,
                     disease_planner_config={
@@ -346,8 +357,8 @@ if __name__ == "__main__":
                     },
                     max_simulation_timesteps=200,
                     early_stopping_patience=14,
-                    use_renderer=False,
-                    toric=True,
+                    use_renderer="ascii",
+                    toric=False,
                     dummy_simulation=False,
                     debug=True)
     env = RogiSimEnv(config=env_config)
@@ -359,9 +370,21 @@ if __name__ == "__main__":
     observation = env.reset()
     done = False
     k = 0
+    env.render(mode="ascii")
     while not done:
-        observation, reward, done, info = env.step(env.action_space.sample())
+        _action = input("Enter action - ex: [1, 4, 2] : ")
+        if _action.strip() == "":
+            _action = env.action_space.sample()
+        else:
+            _action = [int(x) for x in _action.split()]
+            assert _action[0] in [0, 1]
+            assert _action[1] in list(range(env._model.width))
+            assert _action[2] in list(range(env._model.height))
+        print("Action : ", _action)
+        observation, reward, done, info = env.step(_action)
+        env.render(mode="ascii")
         k += 1
+
         # print(observation.shape)
         # print(k, reward, done)
     # print(observation.shape())
