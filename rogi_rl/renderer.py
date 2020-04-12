@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 import numpy as np
+import colorama
 
 import pyglet
 
@@ -228,7 +229,6 @@ class Renderer:
         if type(value) != str:
             raise Exception("renderer.stats value is not String")
         self.stats[key] = value
-        # print(self.stats)
 
     def draw_grid(self, color):
         # Draw Vertical Ticks
@@ -352,22 +352,147 @@ class Renderer:
         self.onetime_geoms = []
         return arr if return_rgb_array else self.screen.isopen
 
+    def close(self):
+        self.screen.close()
+
+
+class ASCIIRenderer:
+    def __init__(self):
+        self.COLOR_MAP = ColorMap(mode="ascii")
+        self.setup()
+
+    def setup(self, mode="ascii"):
+        assert mode == "ascii"
+        colorama.init()
+        self.setup_stats()
+
+    def setup_stats(self):
+        self.stats = {
+            "SCORE": -1.0,
+            "VACCINE_BUDGET": 1.0,
+            "SIMULATION_TICKS": 0,
+            "GAME_TICKS": 0
+        }
+        # Setup Agent State Metrics
+        for _state in AgentState:
+            key = f"population.{_state.name}"
+            self.stats[key] = 0
+
+    def update_stats(self, key, value):
+        if type(value) != str:
+            raise Exception("renderer.stats value is not String")
+        self.stats[key] = value
+
+    def render_stats(self):
+        # Print all state Metrics First
+        render_string = ""
+        for _state in AgentState:
+            key = f"population.{_state.name}"
+            value = self.stats[key]
+            render_string += ("{}={}\t: {} ║ ".format(
+                self._get_cell_string(_state, _char="██"),
+                _state.name,
+                value
+            ))
+        render_string += "\n"
+
+        # Print Score, Ticks, Vaccine Budget
+        render_string += "Overall Score\t: {} ║ ".format(
+            self.stats["SCORE"]
+        )
+        render_string += "Game Ticks\t: {} ║ ".format(
+            self.stats["GAME_TICKS"]
+        )
+        render_string += "Simulation Ticks\t: {} ║ ".format(
+            self.stats["SIMULATION_TICKS"]
+        )
+        render_string += "Vaccine Budget\t: {} ║ ".format(
+            self.stats["VACCINE_BUDGET"]
+        )
+        render_string += "\n"
+
+        return render_string
+
+    def _get_cell_string(self, _state, _char="▄▄"):
+        if _state is None:
+            return "{}{}{}|".format(
+                self.COLOR_MAP.get_color("BACKGROUND_COLOR"),
+                _char,
+                self.COLOR_MAP.get_color("FORE_RESET"),
+            )
+        else:
+            # TODO : Add assertion here to check agent type
+            return "{}{}{}|".format(
+                self.COLOR_MAP.get_color(_state),
+                _char,
+                self.COLOR_MAP.get_color("FORE_RESET"),
+            )
+
+    def render_grid(self, grid):
+        """
+        Renders the Grid in ASCII
+        """
+
+        render_string = ""
+        render_string += "╔"+"═══"*(grid.width+1) + "╗\n"
+        render_string += "║  |{}|║\n".format(
+            "|".join([str(x).zfill(2) for x in range(grid.width)])
+        )
+        for _y in range(grid.height):
+            render_string += "║{}|".format(str(_y).zfill(2))
+            for _x in range(grid.width):
+                _agent = grid[_y][_x]
+                _state = None if _agent is None else _agent.state
+                render_string += self._get_cell_string(_state)
+            render_string += "║\n"
+        render_string += "╚"+"═══"*(grid.width+1) + "╝"
+        return render_string
+
+    def clear_screen(self):
+        print(colorama.ansi.clear_screen())
+
+    def render(self, grid):
+        return "{}\n{}".format(
+            self.render_grid(grid),
+            self.render_stats()
+        )
+
+    def close(self):
+        pass
+
 
 if __name__ == "__main__":
 
-    grid_size = (50, 50)
-    renderer = Renderer(grid_size=grid_size)
-    renderer.setup()
-    x = 0
-    y = 0
+    # grid_size = (50, 50)
+    # renderer = Renderer(grid_size=grid_size)
+    # renderer.setup()
+    # x = 0
+    # y = 0
 
-    while True:
-        renderer.pre_render()
-        renderer.draw_cell(x, y)
+    # while True:
+    #     renderer.pre_render()
+    #     renderer.draw_cell(x, y)
 
-        renderer.post_render()
+    #     renderer.post_render()
 
-        x += 1
-        y += 1
-        x %= grid_size[0]
-        y %= grid_size[1]
+    #     x += 1
+    #     y += 1
+    #     x %= grid_size[0]
+    #     y %= grid_size[1]
+
+    from rogi_rl.model import DiseaseSimModel
+    model = DiseaseSimModel(
+                    population_density=1.0,
+                    initial_infection_fraction=0.01
+                    )
+
+    grid_size = (20, 20)
+    renderer = ASCIIRenderer(
+                    model_grid=model.grid,
+                    grid_size=grid_size)
+
+    for k in range(100):
+        renderer.clear_screen()
+        model.tick()
+        print(renderer.render())
+        input("Press Enter : ")
