@@ -4,6 +4,7 @@ from gym.utils import seeding
 
 from enum import Enum
 import numpy as np
+from collections import deque
 
 
 from rogi_rl.agent_state import AgentState
@@ -44,12 +45,14 @@ class RogiSimEnv(gym.Env):
                     use_renderer=False,
                     toric=True,
                     dummy_simulation=False,
+                    action_store_length=5,
                     debug=False)
         self.config = {}
         self.config.update(self.default_config)
         self.config.update(config)
 
         self.dummy_simulation = self.config["dummy_simulation"]
+        self.action_store = deque(maxlen=self.config["action_store_length"])
         self.debug = self.config["debug"]
 
         self.width = self.config["width"]
@@ -184,6 +187,8 @@ class RogiSimEnv(gym.Env):
             _simulation_steps))
         self.renderer.update_stats("GAME_TICKS", "{}".format(_game_steps))
 
+        self.renderer.stats["PREV_ACTIONS"] = self.action_store
+
         for _state in AgentState:
             key = f"population.{_state.name}"
             stats = state_metrics[key]
@@ -254,6 +259,10 @@ class RogiSimEnv(gym.Env):
         action_type = action[0]
         cell_x = action[1]
         cell_y = action[2]
+
+        _action_string = (ActionType(action_type).name,
+                          str(cell_x), str(cell_y))
+        self.action_store.append(" ".join(_action_string))
 
         _observation = False
         _done = False
@@ -356,6 +365,7 @@ if __name__ == "__main__":
     if record:
         # records the the rendering in the `recording` folder
         env = wrappers.Monitor(env, "recording", force=True)
+
     observation = env.reset()
     done = False
     k = 0

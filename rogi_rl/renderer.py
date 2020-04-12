@@ -68,6 +68,8 @@ class Renderer:
         self.stats["GAME_TICKS"] = 0
         self.stats["VACCINE_BUDGET"] = 0
 
+        self.stats['PREV_ACTIONS'] = []
+
         self.stats["SCORE"] = 0
 
         self.stats["TEXT_STRINGS"] = {}
@@ -195,6 +197,7 @@ class Renderer:
         ))
 
         top_y -= 2 * rect_height + self.AGENT_STATUS_LINE_SPACE
+
         for _state in ["SIMULATION_TICKS", "GAME_TICKS", "VACCINE_BUDGET"]:
             _text_string = str(self.stats[_state])
             _text_string += " "
@@ -203,6 +206,64 @@ class Renderer:
             _font_size = int(self.AGENT_STATUS_FONT_SIZE)
             _color = (*_state_text_color, 255)
 
+            dict_texts[_text_string] = pyglet.text.Label(_text_string,
+                                                         font_size=_font_size,
+                                                         x=top_x, y=top_y,
+                                                         color=_color)
+
+            top_y -= self.AGENT_STATUS_LINE_SPACE + self.AGENT_STATUS_FONT_SIZE
+
+        ################################################################
+        ################################################################
+        # Line
+        ################################################################
+        rect_base_x = top_x
+        rect_base_y = top_y
+
+        rect_width = self.CONTROL_PANEL_WIDTH
+        rect_height = 2
+
+        _state_text_color = self.COLOR_MAP.get_color("AGENT_STATE_TEXT_COLOR")
+        self.draw_standard_rect(_state_text_color, (
+            rect_base_x, rect_base_x + rect_width,
+            rect_base_y + rect_height, rect_base_y
+        ))
+
+        top_y -= 2 * rect_height + self.AGENT_STATUS_LINE_SPACE
+
+        _text_string = "Recent Actions"
+        _font_size = int(self.AGENT_STATUS_FONT_SIZE + 2)
+
+        dict_texts[_text_string] = pyglet.text.Label(_text_string,
+                                                     font_size=_font_size,
+                                                     x=top_x, y=top_y,
+                                                     color=_color)
+
+        top_y -= self.AGENT_STATUS_LINE_SPACE + self.AGENT_STATUS_FONT_SIZE
+
+        ################################################################
+        ################################################################
+        # Line
+        ################################################################
+        rect_base_x = top_x
+        rect_base_y = top_y
+
+        rect_width = self.CONTROL_PANEL_WIDTH
+        rect_height = 2
+
+        _state_text_color = self.COLOR_MAP.get_color("AGENT_STATE_TEXT_COLOR")
+        self.draw_standard_rect(_state_text_color, (
+            rect_base_x, rect_base_x + rect_width,
+            rect_base_y + rect_height, rect_base_y
+        ))
+
+        top_y -= 2 * rect_height + self.AGENT_STATUS_LINE_SPACE
+
+        prev_actions = list(self.stats['PREV_ACTIONS'])
+        _font_size = int(self.AGENT_STATUS_FONT_SIZE)
+
+        for _action in prev_actions[::-1]:
+            _text_string = str(_action)
             dict_texts[_text_string] = pyglet.text.Label(_text_string,
                                                          font_size=_font_size,
                                                          x=top_x, y=top_y,
