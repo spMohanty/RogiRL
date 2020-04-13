@@ -331,7 +331,7 @@ class RogiSimEnv(gym.Env):
         return self.update_renderer(mode=mode)
 
     def close(self):
-        if not self.renderer:
+        if self.renderer:
             self.renderer.close()
             self.renderer = False
         if self._model:
