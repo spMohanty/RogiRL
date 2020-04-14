@@ -88,7 +88,8 @@ class Renderer:
     def get_grid_height(self):
         return self.grid_size[1]
 
-    def setup(self):
+    def setup(self, mode='human'):
+        assert mode == "human"
         if self.screen is None:
             self.screen = rendering.Viewer(self.WIDTH,
                                            self.HEIGHT)
