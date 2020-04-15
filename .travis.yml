@@ -14,7 +14,3 @@ install:
 
 # Command to run tests, e.g. python setup.py test
 script: tox
-
-# Upload to codecov
-after_success:
-  - codecov
