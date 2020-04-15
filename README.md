@@ -3,8 +3,7 @@
 
 [![Build Status](https://travis-ci.org/spMohanty/RogiRL.svg?branch=master)](https://travis-ci.org/spMohanty/RogiRL)
 [![codecov](https://codecov.io/gh/spMohanty/RogiRL/branch/master/graph/badge.svg)](https://codecov.io/gh/spMohanty/RogiRL)
-[![](https://readthedocs.org/projects/rogi-rl/badge/?version=latest)](https://rogi-rl.readthedocs.io/en/latest/?badge=latest)
-
+[![Documentation Status](https://readthedocs.org/projects/rogirl/badge/?version=latest)](https://rogirl.readthedocs.io/en/latest/?badge=latest)
    
 ![](https://i.imgur.com/tvuQdcz.png)
 
