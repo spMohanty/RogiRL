@@ -1,8 +1,7 @@
 # Rogi RL
 
 
-[![](https://img.shields.io/pypi/v/rogi_rl.svg)](https://pypi.python.org/pypi/rogi_rl)
-[![](https://img.shields.io/travis/spMohanty/RogiRL.svg)](https://travis-ci.com/spMohanty/RogiRL)
+[![Build Status](https://travis-ci.org/spMohanty/RogiRL.svg?branch=master)](https://travis-ci.org/spMohanty/RogiRL)
 [![codecov](https://codecov.io/gh/spMohanty/RogiRL/branch/master/graph/badge.svg)](https://codecov.io/gh/spMohanty/RogiRL)
 [![](https://readthedocs.org/projects/rogi-rl/badge/?version=latest)](https://rogi-rl.readthedocs.io/en/latest/?badge=latest)
 
