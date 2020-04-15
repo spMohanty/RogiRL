@@ -12,4 +12,5 @@ commonmark==0.9.1
 recommonmark==0.6.0
 pytest==5.2.1
 pytest-cov==2.8.1
-pytest-runner==5.1codecov==2.0.22
+pytest-runner==5.1
+codecov==2.0.22
