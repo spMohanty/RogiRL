@@ -1,8 +1,4 @@
 
-from rogi_rl.agent_event import AgentEvent
-from rogi_rl.agent_state import AgentState
-
-
 class DiseasePlannerBase:
     """
     This class plans the schedule of different state transitions for a disease
@@ -44,12 +40,33 @@ class SEIRDiseasePlanner(DiseasePlannerBase):
         self.recovery_period_mu = recovery_period_mu
         self.recovery_period_sigma = recovery_period_sigma
 
+        variable_list = [
+            latent_period_mu,
+            incubation_period_mu,
+            recovery_period_mu]
+        if sorted(variable_list) != variable_list:
+            """
+            Cases arises when the provided latent, incubation and
+            recovery period are not in increasing order.
+            """
+            raise Exception(
+                "Invalid Values Provided to Disease Planner."
+                "Expected : Latent Period < Incubation Period < Recover Period"
+            )
+
         self.random = random
         if not self.random:
             import random
             self.random = random
 
     def get_disease_plan(self, base_timestep=0):
+        disease_progression = self.sample_disease_progression()
+        return self.build_disease_plan(
+            disease_progression,
+            base_timestep
+        )
+
+    def sample_disease_progression(self):
         """
             Plans out the schedule of the state transitions for a
             particular agent using a particular disease model.
@@ -73,7 +90,6 @@ class SEIRDiseasePlanner(DiseasePlannerBase):
                 self.latent_period_mu, self.latent_period_sigma))
             if latent_period >= 0:
                 break
-            print(latent_period)
 
         #############################################
         #############################################
@@ -107,6 +123,9 @@ class SEIRDiseasePlanner(DiseasePlannerBase):
             if recovery_period > incubation_period:
                 break
 
+        return latent_period, incubation_period, recovery_period
+
+    def build_disease_plan(self, disease_progression, base_timestep=0):
         #############################################
         #############################################
         #
@@ -114,6 +133,8 @@ class SEIRDiseasePlanner(DiseasePlannerBase):
         #
         #############################################
         #############################################
+        latent_period, incubation_period, recovery_period = \
+            self.sample_disease_progression()
         disease_plan = []
 
         # Susceptible -> Exposed | Now
