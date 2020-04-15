@@ -192,7 +192,7 @@ class RogiSimEnv(gym.Env):
         self.renderer.update_stats("GAME_TICKS", "{}".format(_game_steps))
 
         for _state in AgentState:
-            key = f"population.{_state.name}"
+            key = "population.{}".format(_state.name)
             stats = state_metrics[key]
             self.renderer.update_stats(
                 key,
