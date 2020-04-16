@@ -79,7 +79,7 @@ class ColorMap:
                 elif _state == AgentState.EXPOSED:
                     self.COLOR_MAP[_state] = self.COLORS.PURPLE
                 elif _state == AgentState.INFECTIOUS:
-                    self.COLOR_MAP[_state] = self.COLORS.WHITE
+                    self.COLOR_MAP[_state] = self.COLORS.BROWN
                 elif _state == AgentState.SYMPTOMATIC:
                     self.COLOR_MAP[_state] = self.COLORS.RED
                 elif _state == AgentState.RECOVERED:

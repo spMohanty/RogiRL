@@ -17,8 +17,6 @@ class ActionType(Enum):
 
 
 class RogiSimEnv(gym.Env):
-    metadata = {'render.modes': ['human', 'rgb_array'],
-                'video.frames_per_second': 5}
 
     def __init__(self, config={}):
         # Setup Config
@@ -76,6 +74,12 @@ class RogiSimEnv(gym.Env):
         self.renderer = False
 
         if self.use_renderer:
+            if self.use_renderer == "ascii":
+                self.metadata = {'render.modes': ['human', 'ascii'],
+                                 'video.frames_per_second': 5}
+            else:
+                self.metadata = {'render.modes': ['human', 'rgb_array'],
+                                 'video.frames_per_second': 5}
             self.initialize_renderer(mode=self.use_renderer)
 
         self.cumulative_reward = 0
@@ -146,7 +150,7 @@ class RogiSimEnv(gym.Env):
         return self._model.get_observation()
 
     def initialize_renderer(self, mode="human"):
-        if mode == "human":
+        if mode in ["human", "rgb_array"]:
             from rogi_rl.renderer import Renderer
 
             self.renderer = Renderer(
@@ -201,7 +205,7 @@ class RogiSimEnv(gym.Env):
                     stats*100
                 )
             )
-            if mode == "human":
+            if mode in ["human", "rgb_array"]:
                 color = self.renderer.COLOR_MAP.get_color(_state)
                 agents = scheduler.get_agents_by_state(_state)
                 for _agent in agents:
@@ -210,15 +214,22 @@ class RogiSimEnv(gym.Env):
                                 _agent_x, _agent_y,
                                 color
                             )
-        if mode == "human":
+        if mode in ["human", "rgb_array"]:
             # Update the rest of the renderer
             self.renderer.pre_render()
-            return_rgb_array = mode == 'rgb_array'
-            status = self.renderer.post_render(return_rgb_array)
-            return status
+
+            # Only in case of recording via Monitor or setting mode = rgb_array
+            # we require the rgb image
+            if isinstance(self, wrappers.Monitor):
+                return_rgb_array = mode in ["human", "rgb_array"]
+            else:
+                return_rgb_array = mode == "rgb_array"
+            render_output = self.renderer.post_render(return_rgb_array)
+            return render_output
         elif mode == "ascii":
-            print(self.renderer.render(self._model.grid))
-            return True
+            render_output = self.renderer.render(self._model.grid)
+            print(render_output)
+            return render_output
 
     def get_current_game_score(self):
         """
