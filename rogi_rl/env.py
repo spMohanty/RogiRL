@@ -347,7 +347,7 @@ class RogiSimEnv(gym.Env):
             self.renderer = False
         if self._model:
             # Delete the model instance if it exists
-            del self._model
+            self._model = None
 
 
 if __name__ == "__main__":
