@@ -18,7 +18,7 @@ def tests_sanity_of_parameters_provided():
 
     for k in range(10000):
         latent_period_mu = np.random.randint(0, 100)
-        incubation_period_mu = -1 * np.random.randint(0, 100)
+        incubation_period_mu = np.random.randint(0, 100)
         recovery_period_mu = np.random.randint(0, 100)
         latent_period_sigma = 0
         incubation_period_sigma = 0

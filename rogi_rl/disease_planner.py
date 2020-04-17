@@ -1,3 +1,6 @@
+from rogi_rl.agent_event import AgentEvent
+from rogi_rl.agent_state import AgentState
+
 
 class DiseasePlannerBase:
     """
@@ -44,7 +47,7 @@ class SEIRDiseasePlanner(DiseasePlannerBase):
             latent_period_mu,
             incubation_period_mu,
             recovery_period_mu]
-        if sorted(variable_list) != variable_list:
+        if not(variable_list == sorted(variable_list)):
             """
             Cases arises when the provided latent, incubation and
             recovery period are not in increasing order.
