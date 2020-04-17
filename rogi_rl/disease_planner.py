@@ -10,6 +10,9 @@ class DiseasePlannerBase:
     def __init__(self, random=False):
         pass
 
+    def sample_disease_progression(self):
+        pass
+
     def get_disease_plan(self, base_timestep=0):
         """
             Plans out the schedule of the state transitions for a
@@ -47,6 +50,11 @@ class SEIRDiseasePlanner(DiseasePlannerBase):
             latent_period_mu,
             incubation_period_mu,
             recovery_period_mu]
+        assert latent_period_mu != incubation_period_mu, \
+            "latent_period_mu cannot be equal to incubation_period_mu"
+        assert incubation_period_mu != recovery_period_mu, \
+            "incubation_period_mu cannot be equal to recovery_period_mu"
+
         if not(variable_list == sorted(variable_list)):
             """
             Cases arises when the provided latent, incubation and
@@ -63,6 +71,10 @@ class SEIRDiseasePlanner(DiseasePlannerBase):
             self.random = random
 
     def get_disease_plan(self, base_timestep=0):
+        """
+        It returns a list of AgentEvent objects which have to be
+        "executed" by the Agent at the right moment.
+        """
         disease_progression = self.sample_disease_progression()
         return self.build_disease_plan(
             disease_progression,
@@ -73,9 +85,6 @@ class SEIRDiseasePlanner(DiseasePlannerBase):
         """
             Plans out the schedule of the state transitions for a
             particular agent using a particular disease model.
-
-            It returns a list of AgentEvent objects which have to be
-            "executed" by the Agent at the right moment.
         """
 
         # Case when the patient gets an infection

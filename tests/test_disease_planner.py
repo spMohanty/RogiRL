@@ -16,7 +16,7 @@ def tests_sanity_of_parameters_provided():
         are sensible.
     """
 
-    for k in range(10000):
+    for k in range(1000):
         latent_period_mu = np.random.randint(0, 100)
         incubation_period_mu = np.random.randint(0, 100)
         recovery_period_mu = np.random.randint(0, 100)
@@ -42,3 +42,39 @@ def tests_sanity_of_parameters_provided():
                     recovery_period_sigma=recovery_period_sigma,
                     random=False
                 )
+
+
+def tests_zero_sigma_gives_constant_values():
+    """
+    This tests that passing in 0 as sigma value for the
+    different parameters ensure we get constant values
+    for the individual periods
+    """
+
+    for k in range(1000):
+
+        latent_period_mu = np.random.randint(1, 100)
+        incubation_period_mu = latent_period_mu + np.random.randint(1, 100)
+        recovery_period_mu = \
+            incubation_period_mu + np.random.randint(1, 100)
+
+        latent_period_sigma = 0
+        incubation_period_sigma = 0
+        recovery_period_sigma = 0
+
+        disease_planner = SEIRDiseasePlanner(
+            latent_period_mu=latent_period_mu,
+            latent_period_sigma=latent_period_sigma,
+            incubation_period_mu=incubation_period_mu,
+            incubation_period_sigma=incubation_period_sigma,
+            recovery_period_mu=recovery_period_mu,
+            recovery_period_sigma=recovery_period_sigma,
+            random=False
+        )
+
+        latent_period, incubation_period, recovery_period = \
+            disease_planner.sample_disease_progression()
+
+        assert latent_period == latent_period_mu
+        assert incubation_period == incubation_period_mu
+        assert recovery_period == recovery_period_mu
