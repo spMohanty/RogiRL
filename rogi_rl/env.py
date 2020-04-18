@@ -74,15 +74,14 @@ class RogiSimEnv(gym.Env):
         self.renderer = False
 
         if self.use_renderer:
-            if self.use_renderer == "ascii":
-                self.metadata = {'render.modes': ['human', 'ascii'],
-                                 'video.frames_per_second': 5}
-            else:
-                self.metadata = {'render.modes': ['human', 'rgb_array'],
-                                 'video.frames_per_second': 5}
             self.initialize_renderer(mode=self.use_renderer)
 
         self.cumulative_reward = 0
+
+    def set_renderer(self, renderer):
+        self.use_renderer = renderer
+        if self.use_renderer:
+            self.initialize_renderer(mode=self.use_renderer)
 
     def reset(self):
         # Delete Model if already exists
@@ -151,6 +150,8 @@ class RogiSimEnv(gym.Env):
 
     def initialize_renderer(self, mode="human"):
         if mode in ["human", "rgb_array"]:
+            self.metadata = {'render.modes': ['human', 'rgb_array'],
+                             'video.frames_per_second': 5}
             from rogi_rl.renderer import Renderer
 
             self.renderer = Renderer(
@@ -160,6 +161,8 @@ class RogiSimEnv(gym.Env):
             """
             Initialize ASCII Renderer here
             """
+            self.metadata = {'render.modes': ['human', 'ascii'],
+                             'video.frames_per_second': 5}
             from rogi_rl.renderer import ASCIIRenderer
             self.renderer = ASCIIRenderer()
         self.renderer.setup(mode=mode)
