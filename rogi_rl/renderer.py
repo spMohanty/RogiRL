@@ -61,7 +61,8 @@ class Renderer:
 
         # AgentState Values
         for _state in AgentState:
-            self.stats[f"population.{_state.name}"] = 0
+            _key = "population.{}".format(_state.name)
+            self.stats[_key] = 0
 
         # Simulation Progress
         self.stats["SIMULATION_TICKS"] = 0
@@ -140,7 +141,8 @@ class Renderer:
         ################################################################
 
         for _state in AgentState:
-            _text_string = str(self.stats[f"population.{_state.name}"])
+            _key = "population.{}".format(_state.name)
+            _text_string = str(self.stats[_key])  # This can be refactored
             _text_string += " "
             _text_string += _state.name
 
@@ -376,7 +378,7 @@ class ASCIIRenderer:
         }
         # Setup Agent State Metrics
         for _state in AgentState:
-            key = f"population.{_state.name}"
+            key = "population.{}".format(_state.name)
             self.stats[key] = 0
 
     def update_stats(self, key, value):
@@ -388,7 +390,7 @@ class ASCIIRenderer:
         # Print all state Metrics First
         render_string = ""
         for _state in AgentState:
-            key = f"population.{_state.name}"
+            key = "population.{}".format(_state.name)
             value = self.stats[key]
             render_string += ("{}={}\t: {} ║ ".format(
                 self._get_cell_string(_state, _char="██"),
