@@ -231,7 +231,8 @@ class RogiSimEnv(gym.Env):
             return render_output
         elif mode == "ascii":
             render_output = self.renderer.render(self._model.grid)
-            print(render_output)
+            if self.debug:
+                print(render_output)
             return render_output
 
     def get_current_game_score(self):
