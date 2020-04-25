@@ -257,6 +257,7 @@ class RogiSimEnv(gym.Env):
                 _value = self._model.get_population_fraction_by_state(_state)
             else:
                 _value = self.np_random.rand()
+
             _key = "population.{}".format(_state.name)
             _d[_key] = _value
         # Add R0 to the game metrics

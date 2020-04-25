@@ -1,4 +1,3 @@
-
 from rogi_rl.agent_event import AgentEvent
 from rogi_rl.agent_state import AgentState
 
@@ -9,6 +8,9 @@ class DiseasePlannerBase:
     """
 
     def __init__(self, random=False):
+        pass
+
+    def sample_disease_progression(self):
         pass
 
     def get_disease_plan(self, base_timestep=0):
@@ -44,6 +46,25 @@ class SEIRDiseasePlanner(DiseasePlannerBase):
         self.recovery_period_mu = recovery_period_mu
         self.recovery_period_sigma = recovery_period_sigma
 
+        variable_list = [
+            latent_period_mu,
+            incubation_period_mu,
+            recovery_period_mu]
+        assert latent_period_mu != incubation_period_mu, \
+            "latent_period_mu cannot be equal to incubation_period_mu"
+        assert incubation_period_mu != recovery_period_mu, \
+            "incubation_period_mu cannot be equal to recovery_period_mu"
+
+        if not(variable_list == sorted(variable_list)):
+            """
+            Cases arises when the provided latent, incubation and
+            recovery period are not in increasing order.
+            """
+            raise Exception(
+                "Invalid Values Provided to Disease Planner."
+                "Expected : Latent Period < Incubation Period < Recover Period"
+            )
+
         self.random = random
         if not self.random:
             import random
@@ -51,11 +72,19 @@ class SEIRDiseasePlanner(DiseasePlannerBase):
 
     def get_disease_plan(self, base_timestep=0):
         """
+        It returns a list of AgentEvent objects which have to be
+        "executed" by the Agent at the right moment.
+        """
+        disease_progression = self.sample_disease_progression()
+        return self.build_disease_plan(
+            disease_progression,
+            base_timestep
+        )
+
+    def sample_disease_progression(self):
+        """
             Plans out the schedule of the state transitions for a
             particular agent using a particular disease model.
-
-            It returns a list of AgentEvent objects which have to be
-            "executed" by the Agent at the right moment.
         """
 
         # Case when the patient gets an infection
@@ -73,7 +102,6 @@ class SEIRDiseasePlanner(DiseasePlannerBase):
                 self.latent_period_mu, self.latent_period_sigma))
             if latent_period >= 0:
                 break
-            print(latent_period)
 
         #############################################
         #############################################
@@ -107,6 +135,9 @@ class SEIRDiseasePlanner(DiseasePlannerBase):
             if recovery_period > incubation_period:
                 break
 
+        return latent_period, incubation_period, recovery_period
+
+    def build_disease_plan(self, disease_progression, base_timestep=0):
         #############################################
         #############################################
         #
@@ -114,6 +145,8 @@ class SEIRDiseasePlanner(DiseasePlannerBase):
         #
         #############################################
         #############################################
+        latent_period, incubation_period, recovery_period = \
+            self.sample_disease_progression()
         disease_plan = []
 
         # Susceptible -> Exposed | Now
