@@ -39,7 +39,7 @@ class RogiSimEnv(gym.Env):
                     },
                     max_simulation_timesteps=200,
                     early_stopping_patience=14,
-                    use_renderer=False,  # can be "human", "ascii"
+                    use_renderer=False,  # can be "human", "ansi"
                     toric=True,
                     dummy_simulation=False,
                     debug=False)
@@ -159,12 +159,12 @@ class RogiSimEnv(gym.Env):
                 )
         else:
             """
-            Initialize ASCII Renderer here
+            Initialize ANSI Renderer here
             """
-            self.metadata = {'render.modes': ['human', 'ascii'],
+            self.metadata = {'render.modes': ['human', 'ansi'],
                              'video.frames_per_second': 5}
-            from rogi_rl.renderer import ASCIIRenderer
-            self.renderer = ASCIIRenderer()
+            from rogi_rl.renderer import ANSIRenderer
+            self.renderer = ANSIRenderer()
         self.renderer.setup(mode=mode)
 
     def update_renderer(self, mode='human'):
@@ -229,7 +229,7 @@ class RogiSimEnv(gym.Env):
                 return_rgb_array = mode == "rgb_array"
             render_output = self.renderer.post_render(return_rgb_array)
             return render_output
-        elif mode == "ascii":
+        elif mode == "ansi":
             render_output = self.renderer.render(self._model.grid)
             if self.debug:
                 print(render_output)
@@ -377,7 +377,7 @@ if __name__ == "__main__":
                     },
                     max_simulation_timesteps=200,
                     early_stopping_patience=14,
-                    use_renderer="ascii",
+                    use_renderer="ansi",
                     toric=False,
                     dummy_simulation=False,
                     debug=True)
@@ -390,7 +390,7 @@ if __name__ == "__main__":
     observation = env.reset()
     done = False
     k = 0
-    env.render(mode="ascii")
+    env.render(mode="ansi")
     while not done:
         _action = input("Enter action - ex: [1, 4, 2] : ")
         if _action.strip() == "":
@@ -402,7 +402,7 @@ if __name__ == "__main__":
             assert _action[2] in list(range(env._model.height))
         print("Action : ", _action)
         observation, reward, done, info = env.step(_action)
-        env.render(mode="ascii")
+        env.render(mode="ansi")
         k += 1
 
         # print(observation.shape)
