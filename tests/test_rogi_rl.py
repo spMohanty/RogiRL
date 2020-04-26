@@ -12,7 +12,7 @@ import time
 
 @pytest.mark.parametrize('name, width, height, toric, dummy_simulation, \
                          use_renderer', [
-    ('RogiRL-v0', 10, 10, False, False, "ascii"),
+    ('RogiRL-v0', 10, 10, False, False, "ansi"),
     ('RogiRL-v0', 20, 20, True, False, "human"),
     ('RogiRL-v0', 30, 30, True, False, False),
     ('RogiRL-v0', 40, 40, False, False, False),
