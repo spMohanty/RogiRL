@@ -89,7 +89,8 @@ class Renderer:
     def get_grid_height(self):
         return self.grid_size[1]
 
-    def setup(self):
+    def setup(self, mode='human'):
+        assert mode == "human"
         if self.screen is None:
             self.screen = rendering.Viewer(self.WIDTH,
                                            self.HEIGHT)
@@ -358,13 +359,13 @@ class Renderer:
         self.screen.close()
 
 
-class ASCIIRenderer:
+class ANSIRenderer:
     def __init__(self):
-        self.COLOR_MAP = ColorMap(mode="ascii")
+        self.COLOR_MAP = ColorMap(mode="ansi")
         self.setup()
 
-    def setup(self, mode="ascii"):
-        assert mode == "ascii"
+    def setup(self, mode="ansi"):
+        assert mode == "ansi"
         colorama.init()
         self.setup_stats()
 
@@ -432,7 +433,7 @@ class ASCIIRenderer:
 
     def render_grid(self, grid):
         """
-        Renders the Grid in ASCII
+        Renders the Grid in ANSI
         """
 
         render_string = ""
@@ -489,7 +490,7 @@ if __name__ == "__main__":
                     )
 
     grid_size = (20, 20)
-    renderer = ASCIIRenderer(
+    renderer = ANSIRenderer(
                     model_grid=model.grid,
                     grid_size=grid_size)
 

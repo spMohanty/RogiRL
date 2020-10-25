@@ -32,7 +32,7 @@ class Colors:
     BLUE_GREY = (84, 110, 122)
 
 
-class ASCII_COLOR_MAP:
+class ANSI_COLOR_MAP:
     FORE_BLACK = colorama.Fore.BLACK
     FORE_RED = colorama.Fore.RED
     FORE_GREEN = colorama.Fore.GREEN
@@ -58,14 +58,14 @@ class ColorMap:
     def __init__(self, mode="rgb"):
         """
         Params:
-            mode : "rgb" or "ascii"
+            mode : "rgb" or "ansi"
         """
-        assert mode in ["rgb", "ascii"]
+        assert mode in ["rgb", "ansi"]
 
         if mode == "rgb":
             self.COLORS = Colors()
-        elif mode == "ascii":
-            self.ASCII_COLORS = ASCII_COLOR_MAP()
+        elif mode == "ansi":
+            self.ANSI_COLORS = ANSI_COLOR_MAP()
 
         self.COLOR_MAP = {}
         # AgentState Colors
@@ -79,7 +79,7 @@ class ColorMap:
                 elif _state == AgentState.EXPOSED:
                     self.COLOR_MAP[_state] = self.COLORS.PURPLE
                 elif _state == AgentState.INFECTIOUS:
-                    self.COLOR_MAP[_state] = self.COLORS.WHITE
+                    self.COLOR_MAP[_state] = self.COLORS.BROWN
                 elif _state == AgentState.SYMPTOMATIC:
                     self.COLOR_MAP[_state] = self.COLORS.RED
                 elif _state == AgentState.RECOVERED:
@@ -91,29 +91,29 @@ class ColorMap:
                 self.COLOR_MAP["BACKGROUND_COLOR"] = self.COLORS.WHITE
                 self.COLOR_MAP["AGENT_STATE_TEXT_COLOR"] = self.COLORS.GREY
 
-            elif mode == "ascii":
+            elif mode == "ansi":
                 """
                 Prepare the Colorama Colormap
                 """
                 if _state == AgentState.SUSCEPTIBLE:
-                    self.COLOR_MAP[_state] = self.ASCII_COLORS.FORE_GREEN
+                    self.COLOR_MAP[_state] = self.ANSI_COLORS.FORE_GREEN
                 elif _state == AgentState.EXPOSED:
-                    self.COLOR_MAP[_state] = self.ASCII_COLORS.FORE_CYAN
+                    self.COLOR_MAP[_state] = self.ANSI_COLORS.FORE_CYAN
                 elif _state == AgentState.INFECTIOUS:
-                    self.COLOR_MAP[_state] = self.ASCII_COLORS.FORE_MAGENTA  # noqa
+                    self.COLOR_MAP[_state] = self.ANSI_COLORS.FORE_MAGENTA  # noqa
                 elif _state == AgentState.SYMPTOMATIC:
-                    self.COLOR_MAP[_state] = self.ASCII_COLORS.FORE_RED
+                    self.COLOR_MAP[_state] = self.ANSI_COLORS.FORE_RED
                 elif _state == AgentState.RECOVERED:
-                    self.COLOR_MAP[_state] = self.ASCII_COLORS.FORE_BLUE
+                    self.COLOR_MAP[_state] = self.ANSI_COLORS.FORE_BLUE
                 elif _state == AgentState.VACCINATED:
-                    self.COLOR_MAP[_state] = self.ASCII_COLORS.FORE_YELLOW
+                    self.COLOR_MAP[_state] = self.ANSI_COLORS.FORE_YELLOW
 
-                self.COLOR_MAP["R0/10"] = self.ASCII_COLORS.BACK_CYAN
-                self.COLOR_MAP["BACKGROUND_COLOR"] = self.ASCII_COLORS.FORE_WHITE  # noqa
-                self.COLOR_MAP["AGENT_STATE_TEXT_COLOR"] = self.ASCII_COLORS.FORE_WHITE  # noqa
+                self.COLOR_MAP["R0/10"] = self.ANSI_COLORS.BACK_CYAN
+                self.COLOR_MAP["BACKGROUND_COLOR"] = self.ANSI_COLORS.FORE_WHITE  # noqa
+                self.COLOR_MAP["AGENT_STATE_TEXT_COLOR"] = self.ANSI_COLORS.FORE_WHITE  # noqa
 
-                self.COLOR_MAP["BACK_RESET"] = self.ASCII_COLORS.BACK_RESET
-                self.COLOR_MAP["FORE_RESET"] = self.ASCII_COLORS.FORE_RESET
+                self.COLOR_MAP["BACK_RESET"] = self.ANSI_COLORS.BACK_RESET
+                self.COLOR_MAP["FORE_RESET"] = self.ANSI_COLORS.FORE_RESET
 
     def get_color(self, d):
         try:
