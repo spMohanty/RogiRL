@@ -358,7 +358,7 @@ class RogiSimEnv(gym.Env):
 
 if __name__ == "__main__":
 
-    render = "human"  # change to "ansi"
+    render = "ansi"  # change to "human"
     env_config = dict(
                     width=5,
                     height=5,
