@@ -4,7 +4,7 @@
 [![Build Status](https://travis-ci.org/spMohanty/RogiRL.svg?branch=master)](https://travis-ci.org/spMohanty/RogiRL)
 [![codecov](https://codecov.io/gh/spMohanty/RogiRL/branch/master/graph/badge.svg)](https://codecov.io/gh/spMohanty/RogiRL)
 [![Documentation Status](https://readthedocs.org/projects/rogirl/badge/?version=latest)](https://rogirl.readthedocs.io/en/latest/?badge=latest)
-   
+
 ![](https://i.imgur.com/tvuQdcz.png)
 
 
@@ -14,7 +14,7 @@ A simple Gym environment for RL experiments around disease transmission in a gri
 
 
 ``` bash
-pip install -U git+https://github.com/spMohanty/rogi_rl.git
+pip install -U git+https://github.com/spMohanty/RogiRL.git
 rogi-rl-demo
 ```
 
@@ -35,24 +35,25 @@ while not done:
     observation, reward, done, info = env.step(env.action_space.sample())
 ```
 
-### Usage with ASCII Renderer
+### Usage with ANSI Renderer
 ``` python
 
 from rogi_rl import RogiSimEnv
-
+render = "ansi"
 env_config = dict(
                 width=10,
                 height=10,
                 population_density=0.80,
                 vaccine_density=1.0,
                 initial_infection_fraction=0.02,
-                use_renderer="ascii")
+                use_renderer=render,
+                debug=True)
 
 env = RogiSimEnv(env_config)
 
 observation = env.reset()
 done = False
-env.render(mode="ascii")
+env.render(mode=render)
 while not done:
     _action = input("Enter action - ex: [1, 4, 2] : ")
     if _action.strip() == "":
@@ -64,13 +65,13 @@ while not done:
         assert _action[2] in list(range(env._model.height))
     print("Action : ", _action)
     observation, reward, done, info = env.step(_action)
-    env.render(mode="ascii")
+    env.render(mode=render)
 ```
 
 
 ## Available Configurations
 
-You can instantiate a RogiSim enviornment with the following configuration options 
+You can instantiate a RogiSim enviornment with the following configuration options
 
 ``` python
 
@@ -80,8 +81,8 @@ _config =  dict(
     height=50, # height of the grid
     population_density=0.75, # %-age of the grid to be filled by agents
     vaccine_density=0.05, # no. of vaccines available as a fractions of the population
-    initial_infection_fraction=0.1, # %-age of agents which are infected in the beginning 
-    initial_vaccination_fraction=0.05,# %-age of agents which are vaccinated in the beginning 
+    initial_infection_fraction=0.1, # %-age of agents which are infected in the beginning
+    initial_vaccination_fraction=0.05,# %-age of agents which are vaccinated in the beginning
     prob_infection=0.2, # probability of infection transmission on a single contact
     prob_agent_movement=0.0, # probability that an agent will attempt to move an empty cell around it
     disease_planner_config={
@@ -92,7 +93,7 @@ _config =  dict(
         "recovery_period_mu" :  14 * 4,
         "recovery_period_sigma" :  0,
     },
-    max_timesteps=200, # maximum timesteps per episode 
+    max_timesteps=200, # maximum timesteps per episode
     early_stopping_patience=14, # in-simulator steps to wait with the same susceptible population fraction before concluding that the simulation has ended
     use_renderer=False, # Takes : False, "human", "ascii"
     toric=True, # Make the grid world toric
@@ -110,8 +111,8 @@ env = RogiEnv(config=_config)
 
 
 * Free software: GNU General Public License v3
-* Documentation: https://rogi-rl.readthedocs.io.
+* Documentation: https://rogirl.readthedocs.io.
 
 
 ## Author
-* Sharada Mohanty  
+* Sharada Mohanty
