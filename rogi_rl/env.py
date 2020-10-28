@@ -358,6 +358,7 @@ class RogiSimEnv(gym.Env):
 
 if __name__ == "__main__":
 
+    render = "human"  # change to "ansi"
     env_config = dict(
                     width=5,
                     height=5,
@@ -377,7 +378,7 @@ if __name__ == "__main__":
                     },
                     max_simulation_timesteps=200,
                     early_stopping_patience=14,
-                    use_renderer="ansi",
+                    use_renderer=render,
                     toric=False,
                     dummy_simulation=False,
                     debug=True)
@@ -390,7 +391,7 @@ if __name__ == "__main__":
     observation = env.reset()
     done = False
     k = 0
-    env.render(mode="ansi")
+    env.render(mode=render)
     while not done:
         _action = input("Enter action - ex: [1, 4, 2] : ")
         if _action.strip() == "":
@@ -402,7 +403,7 @@ if __name__ == "__main__":
             assert _action[2] in list(range(env._model.height))
         print("Action : ", _action)
         observation, reward, done, info = env.step(_action)
-        env.render(mode="ansi")
+        env.render(mode=render)
         k += 1
 
         # print(observation.shape)

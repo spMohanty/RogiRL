@@ -125,7 +125,7 @@ def build_server(grid_width=50, grid_height=50):
     }
 
     _server = ModularServer(DiseaseSimModel, [canvas_element, chart_element],  # noqa
-                        "Rogi Simulator", model_params)
+                            "Rogi Simulator", model_params)
 
     return _server
 
