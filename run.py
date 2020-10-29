@@ -1,2 +1,2 @@
-from rogi_rl.server import server  # noqa
+from rog_rl.server import server  # noqa
 server.launch()

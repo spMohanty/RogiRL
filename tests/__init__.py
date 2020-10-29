@@ -1,1 +1,1 @@
-"""Unit test package for rogi_rl."""
+"""Unit test package for rog_rl."""

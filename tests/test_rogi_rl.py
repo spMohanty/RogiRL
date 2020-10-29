@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
-"""Tests for `rogi_rl` package."""
-from rogi_rl import RogiSimEnv  # noqa
+"""Tests for `rog_rl` package."""
+from rog_rl import RogSimEnv  # noqa
 
 
 def test_placeholder():

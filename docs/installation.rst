@@ -8,13 +8,13 @@ Installation
 Stable release
 --------------
 
-To install Rogi RL, run this command in your terminal:
+To install Rog RL, run this command in your terminal:
 
 .. code-block:: console
 
-    $ pip install rogi_rl
+    $ pip install rog_rl
 
-This is the preferred method to install Rogi RL, as it will always install the most recent stable release.
+This is the preferred method to install Rog RL, as it will always install the most recent stable release.
 
 If you don't have `pip`_ installed, this `Python installation guide`_ can guide
 you through the process.
@@ -26,19 +26,19 @@ you through the process.
 From sources
 ------------
 
-The sources for Rogi RL can be downloaded from the `Github repo`_.
+The sources for Rog RL can be downloaded from the `Github repo`_.
 
 You can either clone the public repository:
 
 .. code-block:: console
 
-    $ git clone git://github.com/spMohanty/rogi_rl
+    $ git clone git://github.com/spMohanty/rog_rl
 
 Or download the `tarball`_:
 
 .. code-block:: console
 
-    $ curl -OJL https://github.com/spMohanty/rogi_rl/tarball/master
+    $ curl -OJL https://github.com/spMohanty/rog_rl/tarball/master
 
 Once you have a copy of the source, you can install it with:
 
@@ -47,5 +47,5 @@ Once you have a copy of the source, you can install it with:
     $ python setup.py install
 
 
-.. _Github repo: https://github.com/spMohanty/rogi_rl
-.. _tarball: https://github.com/spMohanty/rogi_rl/tarball/master
+.. _Github repo: https://github.com/spMohanty/rog_rl
+.. _tarball: https://github.com/spMohanty/rog_rl/tarball/master

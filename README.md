@@ -1,9 +1,9 @@
-# Rogi RL
+# Rog RL
 
 
-[![Build Status](https://travis-ci.org/spMohanty/RogiRL.svg?branch=master)](https://travis-ci.org/spMohanty/RogiRL)
-[![codecov](https://codecov.io/gh/spMohanty/RogiRL/branch/master/graph/badge.svg)](https://codecov.io/gh/spMohanty/RogiRL)
-[![Documentation Status](https://readthedocs.org/projects/rogirl/badge/?version=latest)](https://rogirl.readthedocs.io/en/latest/?badge=latest)
+[![Build Status](https://travis-ci.org/spMohanty/RogRL.svg?branch=master)](https://travis-ci.org/spMohanty/RogRL)
+[![codecov](https://codecov.io/gh/spMohanty/RogRL/branch/master/graph/badge.svg)](https://codecov.io/gh/spMohanty/RogRL)
+[![Documentation Status](https://readthedocs.org/projects/rogrl/badge/?version=latest)](https://rogrl.readthedocs.io/en/latest/?badge=latest)
 
 ![](https://i.imgur.com/tvuQdcz.png)
 
@@ -14,8 +14,8 @@ A simple Gym environment for RL experiments around disease transmission in a gri
 
 
 ``` bash
-pip install -U git+https://github.com/spMohanty/RogiRL.git
-rogi-rl-demo
+pip install -U git+https://github.com/spMohanty/RogRL.git
+rog-rl-demo
 ```
 
 and if everything went well, ideally you should see something along the lines of ![this](https://i.imgur.com/AKAi0yQ.png).
@@ -25,9 +25,9 @@ and if everything went well, ideally you should see something along the lines of
 ``` python
 #! /usr/bin/env python
 
-from rogi_rl import RogiSimEnv
+from rog_rl import RogSimEnv
 
-env = RogiSimEnv()
+env = RogSimEnv()
 
 observation = env.reset()
 done = False
@@ -38,7 +38,7 @@ while not done:
 ### Usage with ANSI Renderer
 ``` python
 
-from rogi_rl import RogiSimEnv
+from rog_rl import RogSimEnv
 render = "ansi"
 env_config = dict(
                 width=10,
@@ -49,7 +49,7 @@ env_config = dict(
                 use_renderer=render,
                 debug=True)
 
-env = RogiSimEnv(env_config)
+env = RogSimEnv(env_config)
 
 observation = env.reset()
 done = False
@@ -71,7 +71,7 @@ while not done:
 
 ## Available Configurations
 
-You can instantiate a RogiSim enviornment with the following configuration options
+You can instantiate a RogSim enviornment with the following configuration options
 
 ``` python
 
@@ -100,7 +100,7 @@ _config =  dict(
     dummy_simulation=False, # Send dummy observations, rewards etc. Useful when doing integration testing with RL Experiments codebase
     debug=True)
 
-env = RogiEnv(config=_config)
+env = RogEnv(config=_config)
 
 
 ```
@@ -111,7 +111,7 @@ env = RogiEnv(config=_config)
 
 
 * Free software: GNU General Public License v3
-* Documentation: https://rogirl.readthedocs.io.
+* Documentation: https://rogrl.readthedocs.io.
 
 
 ## Author

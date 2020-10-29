@@ -7,8 +7,8 @@ import pyglet
 
 from pyglet.gl import glClearColor
 
-from rogi_rl.colors import Colors, ColorMap
-from rogi_rl.agent_state import AgentState
+from rog_rl.colors import Colors, ColorMap
+from rog_rl.agent_state import AgentState
 
 from gym.envs.classic_control import rendering
 
@@ -483,7 +483,7 @@ if __name__ == "__main__":
     #     x %= grid_size[0]
     #     y %= grid_size[1]
 
-    from rogi_rl.model import DiseaseSimModel
+    from rog_rl.model import DiseaseSimModel
     model = DiseaseSimModel(
                     population_density=1.0,
                     initial_infection_fraction=0.01

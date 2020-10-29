@@ -1,5 +1,5 @@
-from rogi_rl.agent_event import AgentEvent
-from rogi_rl.agent_state import AgentState
+from rog_rl.agent_event import AgentEvent
+from rog_rl.agent_state import AgentState
 
 
 class DiseasePlannerBase:

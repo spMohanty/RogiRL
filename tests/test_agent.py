@@ -1,5 +1,5 @@
-from rogi_rl.agent import DiseaseSimAgent
-from rogi_rl.model import DiseaseSimModel
+from rog_rl.agent import DiseaseSimAgent
+from rog_rl.model import DiseaseSimModel
 
 
 def test_prob_movement_0():

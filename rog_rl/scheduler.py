@@ -2,7 +2,7 @@
 
 from mesa import Agent, Model
 from mesa.time import RandomActivation
-from rogi_rl.agent_state import AgentState
+from rog_rl.agent_state import AgentState
 
 
 class CustomScheduler(RandomActivation):

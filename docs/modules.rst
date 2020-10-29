@@ -1,7 +1,7 @@
-rogi_rl
+rog_rl
 =======
 
 .. toctree::
    :maxdepth: 4
 
-   rogi_rl
+   rog_rl

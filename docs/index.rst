@@ -1,4 +1,4 @@
-Welcome to Rogi RL's documentation!
+Welcome to Rog RL's documentation!
 ======================================
 
 .. toctree::

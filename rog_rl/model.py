@@ -4,12 +4,12 @@ from mesa.datacollection import DataCollector
 
 import numpy as np
 
-from rogi_rl.agent import DiseaseSimAgent
-from rogi_rl.disease_planner import SEIRDiseasePlanner
-from rogi_rl.scheduler import CustomScheduler
-from rogi_rl.agent_state import AgentState
-from rogi_rl.vaccination_response import VaccinationResponse
-from rogi_rl.contact_network import ContactNetwork
+from rog_rl.agent import DiseaseSimAgent
+from rog_rl.disease_planner import SEIRDiseasePlanner
+from rog_rl.scheduler import CustomScheduler
+from rog_rl.agent_state import AgentState
+from rog_rl.vaccination_response import VaccinationResponse
+from rog_rl.contact_network import ContactNetwork
 
 
 class DiseaseSimModel(Model):

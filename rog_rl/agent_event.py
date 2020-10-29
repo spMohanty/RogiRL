@@ -1,6 +1,6 @@
 
 
-from rogi_rl.agent_state import AgentState
+from rog_rl.agent_state import AgentState
 import time
 
 

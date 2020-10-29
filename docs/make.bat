@@ -9,7 +9,7 @@ if "%SPHINXBUILD%" == "" (
 )
 set SOURCEDIR=.
 set BUILDDIR=_build
-set SPHINXPROJ=rogi_rl
+set SPHINXPROJ=rog_rl
 
 if "%1" == "" goto help
 

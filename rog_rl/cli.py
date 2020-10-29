@@ -1,4 +1,4 @@
-"""Console script for rogi_rl."""
+"""Console script for rog_rl."""
 import sys
 import click
 
@@ -16,7 +16,7 @@ def demo(width, height):
     """
     Demo script to test installation
     """
-    from rogi_rl.server import build_server  # noqa
+    from rog_rl.server import build_server  # noqa
 
     server = build_server(width, height)
     server.launch()
@@ -33,7 +33,7 @@ def profile_perf(render_on):
     If render profile is required, it saves a file `profile_stats_render`
     It also prints the output of the profiling sorted by cumulative time
     """
-    from rogi_rl.benchmark import performance_metrics
+    from rog_rl.benchmark import performance_metrics
 
     performance_metrics(render_on)
 

@@ -4,7 +4,7 @@
 Tests the disease_planner class
 """
 import pytest
-from rogi_rl.disease_planner import SEIRDiseasePlanner
+from rog_rl.disease_planner import SEIRDiseasePlanner
 
 import numpy as np
 

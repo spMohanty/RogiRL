@@ -2,9 +2,9 @@
 Configure visualization elements and instantiate a server
 """
 
-from rogi_rl.model import DiseaseSimModel, DiseaseSimAgent  # noqa
-from rogi_rl.colors import ColorMap
-from rogi_rl.agent_state import AgentState
+from rog_rl.model import DiseaseSimModel, DiseaseSimAgent  # noqa
+from rog_rl.colors import ColorMap
+from rog_rl.agent_state import AgentState
 
 from mesa.visualization.ModularVisualization import ModularServer
 from mesa.visualization.modules import CanvasGrid, ChartModule
@@ -125,7 +125,7 @@ def build_server(grid_width=50, grid_height=50):
     }
 
     _server = ModularServer(DiseaseSimModel, [canvas_element, chart_element],  # noqa
-                            "Rogi Simulator", model_params)
+                            "Rog Simulator", model_params)
 
     return _server
 

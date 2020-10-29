@@ -1,7 +1,7 @@
 #! ~/anaconda3/envs/epirl/bin/python
 
 import time
-from rogi_rl import RogiSimEnv
+from rog_rl import RogSimEnv
 import cProfile
 import pstats
 
@@ -24,7 +24,7 @@ def performance_metrics(render_on=False):
     # import gym
     # env = gym.make('CartPole-v0')
 
-    env = RogiSimEnv(env_config)
+    env = RogSimEnv(env_config)
     env.reset()
     load_time = 1000 * (time.time() - st)
 

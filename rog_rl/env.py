@@ -6,9 +6,9 @@ from enum import Enum
 import numpy as np
 
 
-from rogi_rl.agent_state import AgentState
-from rogi_rl.model import DiseaseSimModel
-from rogi_rl.vaccination_response import VaccinationResponse
+from rog_rl.agent_state import AgentState
+from rog_rl.model import DiseaseSimModel
+from rog_rl.vaccination_response import VaccinationResponse
 
 
 class ActionType(Enum):
@@ -16,7 +16,7 @@ class ActionType(Enum):
     VACCINATE = 1
 
 
-class RogiSimEnv(gym.Env):
+class RogSimEnv(gym.Env):
 
     def __init__(self, config={}):
         # Setup Config
@@ -152,7 +152,7 @@ class RogiSimEnv(gym.Env):
         if mode in ["human", "rgb_array"]:
             self.metadata = {'render.modes': ['human', 'rgb_array'],
                              'video.frames_per_second': 5}
-            from rogi_rl.renderer import Renderer
+            from rog_rl.renderer import Renderer
 
             self.renderer = Renderer(
                     grid_size=(self.width, self.height)
@@ -163,7 +163,7 @@ class RogiSimEnv(gym.Env):
             """
             self.metadata = {'render.modes': ['human', 'ansi'],
                              'video.frames_per_second': 5}
-            from rogi_rl.renderer import ANSIRenderer
+            from rog_rl.renderer import ANSIRenderer
             self.renderer = ANSIRenderer()
         self.renderer.setup(mode=mode)
 
@@ -382,7 +382,7 @@ if __name__ == "__main__":
                     toric=False,
                     dummy_simulation=False,
                     debug=True)
-    env = RogiSimEnv(config=env_config)
+    env = RogSimEnv(config=env_config)
     print("USE RENDERER ?", env.use_renderer)
     record = False
     if record:
