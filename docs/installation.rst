@@ -26,19 +26,19 @@ you through the process.
 From sources
 ------------
 
-The sources for Rog RL can be downloaded from the `Github repo`_.
+The sources for Rog RL can be downloaded from the `Gitlab repo`_.
 
 You can either clone the public repository:
 
 .. code-block:: console
 
-    $ git clone git://github.com/spMohanty/rog_rl
+    $ git clone git://gitlab.aicrowd.com/rog-rl/rog-rl
 
 Or download the `tarball`_:
 
 .. code-block:: console
 
-    $ curl -OJL https://github.com/spMohanty/rog_rl/tarball/master
+    $ curl -OJL https://gitlab.aicrowd.com/rog-rl/rog-rl/tarball/master
 
 Once you have a copy of the source, you can install it with:
 
@@ -47,5 +47,5 @@ Once you have a copy of the source, you can install it with:
     $ python setup.py install
 
 
-.. _Github repo: https://github.com/spMohanty/rog_rl
-.. _tarball: https://github.com/spMohanty/rog_rl/tarball/master
+.. _Gitlab repo: https://gitlab.aicrowd.com/rog-rl/rog-rl
+.. _tarball: https://gitlab.aicrowd.com/rog-rl/rog-rl/tarball/master

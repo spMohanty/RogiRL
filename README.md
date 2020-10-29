@@ -14,7 +14,7 @@ A simple Gym environment for RL experiments around disease transmission in a gri
 
 
 ``` bash
-pip install -U git+https://github.com/spMohanty/RogRL.git
+pip install -U git+git://gitlab.aicrowd.com/rog-rl/rog-rl.git
 rog-rl-demo
 ```
 

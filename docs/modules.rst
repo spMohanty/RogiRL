@@ -1,5 +1,5 @@
 rog_rl
-=======
+======
 
 .. toctree::
    :maxdepth: 4
